@@ -113,8 +113,6 @@ For GSAs 1–5–6–7, current combined assessments still rely primarily on sex
 slicing, though both WGHKE and STECF explicitly recommend moving to sex-specific slicing
 whenever possible @WGHKE2025; @STECF2506.
 
----
-
 ## Overview
 
 This note summarizes what **length-frequency (LF)** data exist by GSA (1, 5, 6, 7) for European hake and how these are converted into **age compositions** for recent STECF/GFCM work. No validated age–length keys (ALKs) or otolith-based age data are currently used for these GSAs; all age data are reconstructed from LF using von Bertalanffy growth parameters (Mellon-Duval et al. 2010; updated in the a4a/FLR framework as a stochastic VBGF centered on Linf ≈ 110 cm, k ≈ 0.178, t0 ≈ −0.04).
@@ -222,9 +220,9 @@ knitr::kable(
   - Introduction of sex-specific growth and slicing once data preparation and tools are mature,
   - Future incorporation of ALKs if and when robust ageing protocols and intercalibration are in place.
 
-# Comparative Growth Parameters (VBGF)
+## Comparative Growth Parameters (VBGF)
 
-## Combined-sex growth
+### Combined-sex growth
 
 The table below compiles key VBGF parameter sets for combined sexes from the
 uploaded material and recent EWG 25-06 growth work.
@@ -264,7 +262,7 @@ Notes:
 - Both WGHKE and STECF highlight that this $L_\infty$ (≈ 110 cm) is strongly influenced by tagging increment data, which tends to pull $L_\infty$ toward maximum observed lengths and may not correspond to mean asymptotic length @WGHKE2025; @STECF2506.
 - In contrast, integrated models in the Adriatic (GSAs 17–18) and Central Med (GSA 19) estimate lower combined-sex $L_\infty$ (≈ 88–90 cm), especially when growth is estimated from ALKs within Stock Synthesis @Carbonara2023; @STECF2506.
 
-## Sex-specific growth
+### Sex-specific growth
 
 The next table summarizes sex-specific VBGF parameters used or discussed for
 different regions.
@@ -306,7 +304,7 @@ Observations:
 - EWG 25-06 concluded that, given current evidence (including ICATMAR growth work), there is no strong empirical basis yet to replace the WestMed VBGF, but that growth uncertainty should be propagated explicitly (stochastic slicing, alternative $L_\infty$ sensitivities) rather than treated as fixed truth.
 
 
-## Gradient in $L_\infty$ across the basin
+### Gradient in $L_\infty$ across the basin
 
 The plot below shows a schematic gradient in female $L_\infty$ across broad regions.
 
@@ -343,7 +341,7 @@ Interpretation:
 - Adjacent Western Med (8–11) and Central Med (17–18, 19) show somewhat lower $L_\infty$, even before considering bi-phasic growth.
 - Eastern Med is data-poorer in these documents, but where estimates exist, they generally do not exceed the West-Med tagging-based values.
 
-## Schematic “growth map” by GSA
+### Schematic “growth map” by GSA
 
 ```{r}
 #| label: tbl-gsa-growth-map
@@ -372,11 +370,8 @@ map_tbl <- data.frame(
 knitr::kable(map_tbl, booktabs = TRUE, align = c("c", "l", "l"))
 ```
 
-## Growth slicing sensitivity (synthetic LFD)
+# Assessment impacts--growth slicing sensitivity 
 
-This section summarizes the synthetic slicing experiment used to gauge how alternative growth assumptions propagate into catch-at-age from length–frequency data. Growth follows a von Bertalanffy growth function (VBGF) with normally distributed length error; conditional age probabilities `P(a | L)` are derived with Bayes’ rule and applied to a synthetic LFD. The experiment also compares implied L50 under different growth options and adds nominal CPUE proxies from fishery trawl effort.
-
-### Growth curves and \(P(a \mid L)\)
 
 The VBGF for expected length at age is
 
@@ -384,21 +379,14 @@ $$
 L(a) = L_\infty \bigl(1 - e^{-k\,(a - t_0)}\bigr),
 $$
 
-with observed lengths distributed as $$
+and observed lengths are assumed $$
 L \mid a \sim \mathcal N\!\left(L(a),\, \sigma_L^2\right).
 $$
 
-For two size-at-age anchors $(A_1, L_1)$ and $(A_2, L_2)$, the curve can be reparameterized as
-
-$$
-L_t = L_\infty + (L_1 - L_\infty)e^{-k\,(t-A_1)}, \qquad
-L_\infty = L_1 + \frac{L_2 - L_1}{1 - e^{-k\,(A_2 - A_1)}}.
-$$
-
-Four options are compared: `Base_WestMed` (tagging-informed West Med curve, 110 cm, $k = 0.178$, $t_0 \approx 0$), `Lower_Linf` (95 cm, slightly faster $k$), `Higher_k` (110 cm, steeper $k$), and `Adriatic_SS3` (88 cm, earlier $t_0$).
+Four options are compared: - `Base_WestMed`: tagging-informed West Med curve (110 cm, $k = 0.178$, $t_0 \approx 0$). - `Lower_Linf`: shrinks $L_\infty$ (95 cm) and modestly increases $k$ to mimic slower growth. - `Higher_k`: keeps $L_\infty$ but steepens $k$ to 0.25, shifting growth leftward. - `Adriatic_SS3`: uses a smaller Adriatic-style asymptote (88 cm) and earlier $t_0$.
 
 ```{r}
-#| label: growth-sens-def
+#| label: growth-def
 vb_len <- function(age, Linf, k, t0) Linf * (1 - exp(-k * (age - t0)))
 
 growth_scenarios <- tibble::tribble(
@@ -419,8 +407,9 @@ dL_given_a <- function(L, age, Linf, k, t0, sigma = len_sd) {
 }
 ```
 
+### P(a\|L) heatmaps
+
 ```{r}
-#| label: growth-sens-pal
 pal_grid <- growth_scenarios |>
   tidyr::crossing(age = ages, L = L_grid) |>
   rowwise() |>
@@ -431,16 +420,12 @@ pal_grid <- growth_scenarios |>
   ungroup()
 ```
 
-Here the conditional probability of age given length for a discrete set of ages is
-
-$$
+Here the conditional probability of age given length for a discrete set of ages is $$
 P(a \mid L) = \frac{f(L \mid a)}{\sum_{a'} f(L \mid a')},
-$$
-
-where $f(L \mid a)$ is the normal density above. Changing $L_\infty$, $k$, or $t_0$ shifts the relative weight across ages for the same observed length.
+$$ where $f(L \mid a)$ is the normal density above. Changing $L_\infty$, $k$, or $t_0$ shifts the relative weight across ages for the same observed length.
 
 ```{r}
-#| label: fig-growth-sens-pal
+#| label: fig-pal
 #| fig-cap: "Conditional age probabilities P(a|L) across growth scenarios."
 ggplot(pal_grid, aes(L, factor(age), fill = p_a_given_L)) +
   geom_tile() +
@@ -450,20 +435,26 @@ ggplot(pal_grid, aes(L, factor(age), fill = p_a_given_L)) +
   theme_few()
 ```
 
-Lower $L_\infty$ shifts probability mass to younger ages; a steeper $k$ compresses early growth and can move modal ages down for small fish but up for larger fish.
+As $L_\infty$ drops (e.g., `Lower_Linf`), younger ages gain probability mass at a given length, while a steeper $k$ (`Higher_k`) compresses early growth and can shift modal ages downward for small fish but upward for larger fish.
+@fig-pal shows these shifts across scenarios.
 
 ```{r}
-#| label: growth-sens-pal-density
+#| label: pal-density
 len_pdf <- pal_grid |>
   group_by(scenario, age) |>
   mutate(p_L_given_a = density_L_given_a / sum(density_L_given_a)) |>
   ungroup()
 ```
 
-### Synthetic LFD and ΔCAA
+### Slicing impacts shown as ΔCAA
+
+Given an LFD with counts $n_L$ at mid-point $L$, slicing under a given growth option is $$
+\mathrm{CAA}_a = \sum_L P(a \mid L)\, n_L,
+$$ which collapses length bins into ages using the option-specific $P(a \mid L)$.
 
 ```{r}
-#| label: growth-sens-sim-lfd
+#| label: fig-delta-caa
+#| fig-cap: "Difference in CAA relative to Base_WestMed growth."
 set.seed(123)
 true_age_probs <- c(0.30,0.30,0.20,0.10,0.06,0.03,0.01)
 names(true_age_probs) <- ages
@@ -475,98 +466,529 @@ true_growth <- growth_scenarios |> filter(scenario=="Base_WestMed")
 sim_lengths <- tibble(age=true_ages) |>
   mutate(L = vb_len(age, true_growth$Linf, true_growth$k, true_growth$t0) +
            rnorm(n(), 0, len_sd))
-```
 
-```{r}
-#| label: growth-sens-lfd-bins
-lfd <- sim_lengths |>
-  mutate(L_bin = cut(L, breaks=seq(0,100,by=2), include.lowest=TRUE, right=FALSE)) |>
-  count(L_bin, name="n") |>
-  mutate(L_mid = seq(1, 99, by=2)[as.integer(L_bin)]) |>
-  filter(!is.na(L_mid))
-```
+sim_LFD <- sim_lengths |>
+  mutate(L_bin = cut(L, breaks=seq(0,80,1), right=FALSE)) |>
+  count(L_bin) |>
+  filter(!is.na(L_bin)) |>
+  mutate(L_mid = as.numeric(sub("\\[(.*),(.*)\\)","\\1",L_bin))+0.5)
 
-```{r}
-#| label: growth-sens-pal-mat
-pal_mat <- pal_grid |>
-  mutate(age = as.integer(age)) |>
-  select(scenario, L, age, p_a_given_L)
-```
+CAA_by_scenario <- pal_grid |>
+  mutate(L_mid=L) |>
+  inner_join(sim_LFD, by="L_mid") |>
+  group_by(scenario, age) |>
+  summarise(CAA=sum(p_a_given_L*n), .groups="drop")
+base_scen <- "Base_WestMed"
 
-```{r}
-#| label: growth-sens-slice
-slice_lfd <- function(scen) {
-  pal_scen <- pal_mat |> filter(scenario == scen)
-  L_bins <- lfd$L_mid
-  caa <- expand_grid(L_mid = L_bins, age = ages) |>
-    left_join(pal_scen, by = c("L_mid" = "L", "age" = "age")) |>
-    left_join(lfd, by = "L_mid") |>
-    mutate(prob = p_a_given_L, n = replace_na(n, 0)) |>
-    group_by(age) |>
-    summarise(CAA = sum(n * prob, na.rm = TRUE), .groups = "drop") |>
-    mutate(scenario = scen)
-  caa
-}
+CAA_wide <- CAA_by_scenario |>
+  tidyr::pivot_wider(names_from=scenario, values_from=CAA)
 
-caa_all <- purrr::map_dfr(growth_scenarios$scenario, slice_lfd)
-```
+CAA_long_diff <- CAA_wide |>
+  pivot_longer(-age, names_to="scenario", values_to="CAA") |>
+  group_by(age) |>
+  mutate(CAA_base = CAA[scenario==base_scen],
+         Delta_CAA = CAA - CAA_base) |>
+  ungroup() |>
+  filter(scenario != base_scen)
 
-```{r}
-#| label: growth-sens-delta-caa
-base_caa <- caa_all |> filter(scenario == "Base_WestMed") |> select(age, base_CAA = CAA)
-delta_caa <- caa_all |>
-  left_join(base_caa, by="age") |>
-  filter(scenario != "Base_WestMed") |>
-  mutate(delta = CAA - base_CAA)
-```
-
-```{r}
-#| label: fig-growth-sens-delta-caa
-#| fig-cap: "ΔCAA relative to Base_WestMed slicing."
-ggplot(delta_caa, aes(age, delta, color = scenario)) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2) +
-  labs(
-    x="Age",
-    y="ΔCAA (counts)",
-    title="Change in CAA when slicing under alternative growth"
-  ) +
+ggplot(CAA_long_diff, aes(factor(age), scenario, fill=Delta_CAA)) +
+  geom_tile() +
+  scale_fill_gradient2() +
+  labs(x="Age", y="Scenario", title="ΔCAA vs Base Growth") +
   theme_few()
 ```
 
-Relative to Base_WestMed, shrinking $L_\infty$ moves fish from older to younger ages, increasing CAA for ages 0–2 and decreasing it for ages 4–6. Higher $k$ behaves similarly but with a milder gradient; the Adriatic-style curve has the strongest shift toward young ages.
+Relative to the base curve, shrinking $L_\infty$ moves fish from older to younger ages, increasing CAA for ages 0–2 and decreasing it for ages 4–6. Higher $k$ behaves similarly but with a milder gradient; the Adriatic-style curve has the strongest shift toward young ages.
+See @fig-delta-caa.
 
-### Length-50 maturity comparison
+### Modal age flips
+
+Modal ages flip earliest in the 20–30 cm range; larger $L_\infty$ holds older modal ages at intermediate lengths, so reducing $L_\infty$ pushes the mode younger for much of the length range. A “flip” means the age with highest $P(a \mid L)$ differs between two growth assumptions; e.g., a 25 cm fish might be modal age 2 under the base curve but modal age 1 under the lower $L_\infty$ curve. These flips are where slicing outcomes are most sensitive to the growth choice because a small change in assumed curve reassigns the modal age for an entire length bin.
+@fig-modal-flip highlights the affected length bins.
 
 ```{r}
-#| label: growth-sens-maturity
-years <- 1:20
-N_long <- tibble(age = ages, N = c(2000, 1800, 1400, 1000, 600, 200, 100))
+#| label: fig-modal-flip
+#| fig-cap: "Length bins where the modal age flips between Base_WestMed and Lower_Linf."
+scen_A <- "Base_WestMed"
+scen_B <- "Lower_Linf"
 
-p_mat_age <- tibble(
-  age = ages,
-  p_mat = c(0.0, 0.2, 0.5, 0.7, 0.9, 0.95, 0.95)
+modal_age_by_L <- pal_grid |>
+  filter(scenario %in% c(scen_A, scen_B)) |>
+  group_by(scenario, L) |>
+  slice_max(p_a_given_L) |>
+  ungroup() |>
+  select(scenario, L, modal_age=age)
+
+modal_wide <- modal_age_by_L |>
+  pivot_wider(names_from=scenario, values_from=modal_age,
+              names_prefix="age_") |>
+  mutate(flip = age_Base_WestMed != age_Lower_Linf)
+
+ggplot(modal_wide, aes(L, 0, fill=flip)) +
+  geom_tile(height=1) +
+  scale_fill_manual(values=c("grey80","red")) +
+  labs(x="Length", y=NULL, title="Length bins where modal age flips") +
+  theme_few() +
+  theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
+```
+
+### Derived weight-at-age under each growth option
+
+Assuming $W = \alpha L^\beta$ with $\alpha = 0.0000067$ and $\beta = 3.035$, expected weight at age is the probability-weighted integral over length: $$
+E[W \mid a] = \alpha \sum_L L^\beta \, P(L \mid a).
+$$
+
+```{r}
+#| label: fig-weight-age
+#| fig-cap: "Expected weight-at-age by growth scenario."
+alpha_w <- 0.0000067
+beta_w <- 3.035
+
+weight_age <- len_pdf |>
+  group_by(scenario, age) |>
+  summarise(E_W = alpha_w * sum((L^beta_w) * p_L_given_a),
+            E_L = sum(L * p_L_given_a),
+            .groups="drop")
+
+ggplot(weight_age, aes(age, E_W, color=scenario)) +
+  geom_line() +
+  geom_point() +
+  labs(x="Age", y="Expected weight (kg)", title="Weight-at-age implied by growth options") +
+  theme_few()
+```
+
+Lower $L_\infty$ yields sharply lower weight for ages 3+, while higher $k$ mainly affects ages 0–2. The Adriatic-style curve gives the lightest older fish because both $L_\infty$ and $t_0$ pull lengths downward.
+@fig-weight-age summarizes the expected weight trajectories.
+
+### Stochastic slicing
+
+```{r}
+#| label: stoch-draws
+set.seed(456)
+n_draws <- 200
+base <- growth_scenarios |> filter(scenario==base_scen)
+
+draws <- tibble(
+  draw=1:n_draws,
+  Linf=rnorm(n_draws, base$Linf, 3),
+  k=rnorm(n_draws, base$k, 0.02),
+  t0=rnorm(n_draws, base$t0, 0.05)
 )
 
-L_grid_long <- seq(5, 120, by = 0.5)
-
-calc_pL_given_a <- function(growth_row) {
-  crossing(age = ages, L = L_grid_long) |>
+slice_once <- function(Linf, k, t0) {
+  pal <- tibble(L=L_grid) |>
+    tidyr::crossing(age=ages) |>
     rowwise() |>
-    mutate(density = dL_given_a(L, age, growth_row$Linf, growth_row$k, growth_row$t0)) |>
+    mutate(density=dL_given_a(L, age, Linf, k, t0)) |>
     ungroup() |>
+    group_by(L) |>
+    mutate(p=density/sum(density)) |>
+    ungroup() |>
+    mutate(L_mid=L)
+
+  pal |>
+    inner_join(sim_LFD, by="L_mid") |>
     group_by(age) |>
-    mutate(p_L_given_a = density / sum(density)) |>
-    ungroup()
+    summarise(CAA=sum(p*n), .groups="drop")
 }
 
-len_probs_base <- calc_pL_given_a(growth_scenarios |> filter(scenario == "Base_WestMed"))
-len_probs_adr <- calc_pL_given_a(growth_scenarios |> filter(scenario == "Adriatic_SS3"))
+CAA_stoch <- draws |>
+  mutate(CAA = purrr::pmap(list(Linf,k,t0), slice_once)) |>
+  tidyr::unnest(CAA)
+
+CAA_summary <- CAA_stoch |>
+  group_by(age) |>
+  summarise(CAA_mean=mean(CAA),
+            CAA_lo=quantile(CAA,0.05),
+            CAA_hi=quantile(CAA,0.95))
+```
+
+This “stochastic slicing” draws $(L_\infty, k, t_0)$ from normal priors centered on the base West Med values. The resulting fan of $\mathrm{CAA}_a$ reflects uncertainty in the growth curve rather than sampling error in the LFD.
+
+```{r}
+#| label: fig-caa-stoch
+#| fig-cap: "CAA means and 90% intervals from stochastic growth draws."
+ggplot(CAA_summary, aes(factor(age), CAA_mean)) +
+  geom_col() +
+  geom_errorbar(aes(ymin=CAA_lo, ymax=CAA_hi), width=0.2) +
+  labs(x="Age", y="CAA", title="Stochastic slicing uncertainty") +
+  theme_few()
+```
+
+Even modest growth uncertainty (SD of 3 cm in $L_\infty$ and 0.02 in $k$) produces wide CAA intervals for ages 0–3. The width narrows for older ages because relatively few fish are assigned there under any plausible curve, so variance in $P(a \mid L)$ matters less.
+
+### Weight-at-age under growth uncertainty
+
+The same draws of $(L_\infty, k, t_0)$ propagate to weight-at-age via $W = \alpha L^\beta$. For each draw, we compute $E[W \mid a]$ using $P(L \mid a)$ and then summarise the envelope.
+
+```{r}
+#| label: weight-uncert
+weight_once <- function(Linf, k, t0) {
+  tibble(L=L_grid) |>
+    tidyr::crossing(age=ages) |>
+    rowwise() |>
+    mutate(density=dL_given_a(L, age, Linf, k, t0)) |>
+    ungroup() |>
+    group_by(age) |>
+    mutate(p_L_given_a = density/sum(density)) |>
+    summarise(W = alpha_w * sum((L^beta_w) * p_L_given_a),
+              .groups="drop")
+}
+
+weight_stoch <- draws |>
+  mutate(weight = purrr::pmap(list(Linf,k,t0), weight_once)) |>
+  tidyr::unnest(weight)
+
+weight_stoch_summary <- weight_stoch |>
+  group_by(age) |>
+  summarise(W_mean = mean(W),
+            W_lo = quantile(W, 0.05),
+            W_hi = quantile(W, 0.95),
+            .groups="drop")
+
+```
+
+```{r}
+#| label: fig-weight-stoch
+#| fig-cap: "Expected weight-at-age with 90% bounds from growth uncertainty."
+ggplot(weight_stoch_summary, aes(age, W_mean)) +
+  geom_ribbon(aes(ymin=W_lo, ymax=W_hi), fill="grey80") +
+  geom_line() +
+  geom_point() +
+  labs(x="Age", y="Expected weight (kg)", title="Weight-at-age uncertainty from growth draws") +
+  theme_few()
+```
+
+Growth uncertainty pushes a wide band of weight-at-age for ages 2–4, where small changes in $L_\infty$ and $k$ translate to large cubic changes in weight. Younger ages show less spread because all curves predict short lengths there, and older ages collapse as very few fish are assigned to them.
+@fig-weight-stoch shows the envelope.
+
+### Proportion mature-at-age
+
+Assuming a length-based maturity ogive with 50% maturity at 29 cm and slope parameter $s=0.5$, $$
+p_{\text{mat}}(L) = \frac{1}{1 + e^{-s(L - 26)}}.
+$$ The maturity-at-age for each growth option integrates this ogive over $P(L \mid a)$.
+
+```{r}
+#| label: fig-mature
+#| fig-cap: "Proportion mature-at-age implied by length-based ogive under each growth option."
+L50 <- 26
+s_mat <- 0.5
+pmat <- function(L) 1 / (1 + exp(-s_mat * (L - L50)))
+
+mature_age <- len_pdf |>
+  mutate(p_mat = pmat(L)) |>
+  group_by(scenario, age) |>
+  summarise(p_mature = sum(p_mat * p_L_given_a), .groups="drop")
+
+ggplot(mature_age, aes(age, p_mature, color=scenario)) +
+  geom_line() +
+  geom_point() +
+  labs(x="Age", y="Proportion mature", title="Proportion mature-at-age by growth option") +
+  theme_few()
+```
+
+Lower $L_\infty$ accelerates maturity (ages 1–2 cross 50% earlier), while the base and high-$k$ curves keep a longer immature tail. This illustrates how growth choice not only shifts CAA but also maturity ogives used in spawning-stock calculations.
+See @fig-mature.
+
+## Sensitivity: spawning biomass per recruit
+
+Using the weight-at-age and maturity-at-age above, a natural mortality schedule $M_a = (1.155, 0.61, 0.437, 0.353, 0.304, 0.273)$ for ages 0–5+, and a knife-edge fishery selectivity at 18 cm (probability of capture = 0 below 18 cm, 1 above), the spawning biomass per recruit (SSB/R) under a unit fully-selected fishing mortality ($F=1$) is $$
+\text{SSB/R} = \sum_{a=0}^{A-1} N_a e^{-Z_a/2} W_a p_{\text{mat},a} +
+N_A \frac{e^{-Z_A/2}}{1 - e^{-Z_A}} W_A p_{\text{mat},A},
+$$ with $Z_a = M_a + F s_a$, $N_0 = 1$, and $N_{a+1} = N_a e^{-Z_a}$ for $a < A$.
+
+```{r}
+#| label: ssb-calc
+M_sched <- c(1.155, 0.61, 0.437, 0.353, 0.304, 0.273)
+M_at_age <- c(M_sched[1:6], M_sched[6])  # extend 5+ to age 6
+F_full <- 1
+L_sel <- 18
+
+sel_at_age <- len_pdf |>
+  mutate(sel = ifelse(L >= L_sel, 1, 0)) |>
+  group_by(scenario, age) |>
+  summarise(sel = sum(sel * p_L_given_a), .groups="drop")
+
+ssbpr_calc <- function(scen) {
+  waa <- weight_age |> filter(scenario == scen) |> arrange(age) |> pull(E_W)
+  mat <- mature_age |> filter(scenario == scen) |> arrange(age) |> pull(p_mature)
+  sel <- sel_at_age |> filter(scenario == scen) |> arrange(age) |> pull(sel)
+  Z <- M_at_age + F_full * sel
+  A <- length(ages) - 1
+  N <- numeric(length(ages))
+  N[1] <- 1
+  for (i in 1:A) {
+    N[i+1] <- N[i] * exp(-Z[i])
+  }
+  ssb <- sum(N[1:A] * exp(-0.5 * Z[1:A]) * waa[1:A] * mat[1:A])
+  ssb_plus <- N[A+1] * exp(-0.5 * Z[A+1]) / (1 - exp(-Z[A+1])) * waa[A+1] * mat[A+1]
+  tibble(scenario = scen, SSBPR = ssb + ssb_plus)
+}
+
+ssbpr <- growth_scenarios$scenario |>
+  purrr::map_dfr(ssbpr_calc) |>
+  mutate(rel_base = SSBPR / SSBPR[scenario == "Adriatic_SS3"])
+
+```
+
+```{r}
+#| label: fig-ssb-bar
+#| fig-cap: "SSB per recruit at F=1 under each growth option."
+ggplot(ssbpr, aes(scenario, SSBPR, fill=scenario)) +
+  geom_col() +
+  labs(x=NULL, y="SSB per recruit (kg)", title="SSB/R sensitivity to growth assumptions") +
+  theme_few() +
+  theme(legend.position="none")
+```
+
+The Adriatic-style growth produces the lowest SSB/R because smaller $L_\infty$ depresses weight and maturity at age, while the tagging-based `Base_WestMed` yields the highest SSB/R under the same $M$ and $F$ assumptions. `Higher_k` sits slightly below the base because earlier growth moves fish into the fishery (18 cm) sooner, increasing fishing mortality exposure before they reach larger weights.
+
+Unfished SSB/R differs by more than two-fold between the tagging-informed base and the Adriatic-style curve, underscoring how growth choice alone changes the starting point for spawning potential calculations.
+
+### Impact on proxy $F_{MSY}$ estimates
+
+Varying $F$ from 0 to 1.0 (fully selected) shows how the growth options change the slope of the SSB/R curve. Steeper curves imply greater sensitivity to fishing.
+
+```{r}
+F_grid <- seq(0, 1.0, by=0.025)
+
+ssbpr_one <- function(scen, Fval) {
+  waa <- weight_age |> filter(scenario == scen) |> arrange(age) |> pull(E_W)
+  mat <- mature_age |> filter(scenario == scen) |> arrange(age) |> pull(p_mature)
+  sel <- sel_at_age |> filter(scenario == scen) |> arrange(age) |> pull(sel)
+  Z <- M_at_age + Fval * sel
+  A <- length(ages) - 1
+  N <- numeric(length(ages))
+  N[1] <- 1
+  for (i in 1:A) {
+    N[i+1] <- N[i] * exp(-Z[i])
+  }
+  ssb <- sum(N[1:A] * exp(-0.5 * Z[1:A]) * waa[1:A] * mat[1:A])
+  ssb_plus <- N[A+1] * exp(-0.5 * Z[A+1]) / (1 - exp(-Z[A+1])) * waa[A+1] * mat[A+1]
+  ssb + ssb_plus
+}
+
+ssbpr_F <- expand_grid(scenario = growth_scenarios$scenario, F = F_grid) |>
+  mutate(SSBPR = purrr::map2_dbl(scenario, F, ssbpr_one))
+
+ssbpr_ref0 <- ssbpr_F |>
+  filter(scenario == "Adriatic_SS3", F == 0) |>
+  pull(SSBPR)
+
+ssbpr_F <- ssbpr_F |>
+  mutate(SSBPR_pct = 100*SSBPR / ssbpr_ref0)
+
+```
+
+```{r}
+#| label: fig-ssb-f
+#| fig-cap: "Relative SSB/R across fully-selected F values, scaled to Adriatic_SS3 at F=0."
+ggplot(ssbpr_F, aes(F, SSBPR_pct, color=scenario)) +
+  geom_line() +
+  labs(x="Fully selected F", y="SSB/R (% of Adriatic_SS3 F=0)", title="SSB/R profile by growth option") + geom_hline(yintercept = 35, 
+  color='grey', linetype = "dashed") + 
+scale_y_continuous(labels = scales::label_percent(scale = 1)) +
+  theme_few()
+```
+
+All curves decline as $F$ rises, but the lower-$L_\infty$ and higher-$k$ options drop faster because fish become vulnerable earlier and contribute less weight before capture. Expressing everything relative to the Adriatic_SS3 unfished level highlights how quickly each option erodes spawning potential compared to that conservative baseline (the horizontal dashed line is $F_{35\%}$ where it crosses the other lines).
+@fig-ssb-bar and @fig-ssb-f show the level and shape of SSB/R across $F$.
+
+## SS3-style growth parameters and length-at-age densities
+
+Stock Synthesis 3 often parameterizes the VBGF with two fixed size-at-age points and $k$: $$
+L_t = L_\infty + (L_1 - L_\infty)e^{-k\,(t-A_1)},
+$$ where $L_1$ is length at age $A_1$ (young age) and $L_\infty$ is derived from a second size-at-age point $(A_2, L_2)$ as $$
+L_\infty = L_1 + \frac{L_2 - L_1}{1 - e^{-k\,(A_2 - A_1)}}.
+$$ Here we take $A_1 = 0.5$ yr and $A_2 = 4.5$ yr. The current VBGF parameters map to these SS3 inputs as follows:
+
+```{r}
+#| label: tbl-ss3-map
+#| tbl-cap: "Mapping VBGF parameters to SS3-style growth inputs ($A_1=0.5$, $A_2=4.5$)."
+ss3_params <- growth_scenarios |>
+  mutate(L1 = vb_len(0.5, Linf, k, t0),
+         L2 = vb_len(4.5, Linf, k, t0),
+         k_param = k) |>
+  select(scenario, L1, L2, k_param)
+
+knitr::kable(ss3_params, digits=2,
+             col.names=c("Scenario","L1 (0.5 yr, cm)","L2 (4.5 yr, cm)","k"))
+```
+
+To illustrate implied observation error on length-at-age under this parameterization, assume the CV of length-at-age is 0.1 at age $A_1$ and 0.09 at age $A_2$, linearly interpolated between and held flat beyond. Length-at-age is then modeled as $L \mid a \sim \mathcal N(\mu_a, (\text{CV}_a \mu_a)^2)$ with $\mu_a$ from the mapped growth curve.
+
+```{r}
+#| label: ss3-dens
+cv_points <- tibble(age=c(0.5, 4.5), cv=c(0.10, 0.09))
+cv_fun <- function(age_vec) approx(cv_points$age, cv_points$cv, xout=age_vec, rule=2)$y
+
+ages_ss3 <- seq(0.5, 5, by=0.5)
+L_grid_ss3 <- seq(5, 120, by=0.5)
+
+dens_ss3 <- growth_scenarios |>
+  tidyr::crossing(age = ages_ss3, L = L_grid_ss3) |>
+  rowwise() |>
+  mutate(mu = vb_len(age, Linf, k, t0),
+         cv = cv_fun(age),
+         sigma = cv * mu,
+         density = dnorm(L, mu, sigma)) |>
+  ungroup()
+
+# Build mirrored polygons by age to mimic SS3 growth plot; shown for Base_WestMed
+poly_all <- dens_ss3 |>
+  filter(age %in% c(1, 2, 3, 4)) |>
+  filter(scenario %in% c("Base_WestMed","Adriatic_SS3")) |>
+  filter(density >= 1e-5) |>
+  group_by(scenario, age) |>
+  arrange(L) |>
+  mutate(width = density / max(density) * 0.15) |>
+  summarise(
+    age_poly = c(age - width, rev(age + width)),
+    L_poly = c(L, rev(L)),
+    scenario = first(scenario),
+    grp = cur_group_id(),
+    .groups="drop"
+  )
+
+```
+
+```{r}
+#| label: fig-len-dens
+#| fig-cap: "Length-at-age densities (ages 1–4) for Base_WestMed vs Adriatic_SS3."
+ggplot(poly_all, aes(age_poly, L_poly, group=interaction(grp, scenario), fill=scenario, color=scenario)) +
+  geom_polygon(alpha=0.5) +
+  labs(x="Age (yr)", y="Length (cm)", title="Length-at-age densities (ages 1–4) by scenario") +
+  coord_cartesian(ylim=c(min(L_grid_ss3), 80)) + 
+  theme_minimal()
+```
+
+These densities form the matrix $f(L \mid a)$ that SS3 would use given the mapped parameters and CV schedule. The tagging-informed curve pushes means rightward, while the Adriatic-style curve keeps most probability mass at shorter lengths; decreasing CV with age tightens older-age densities around their means.
+
+## Age versus length-based maturity
+
+If we imagine that spawning is directly linked to fish age rather than size, we can illustrate how a fixed (over time) age-based ogive can cause variability in the apparent L50. To examine this we simulated a 20-year population using the Base_WestMed growth and the same natural mortality schedule. Recruitment at age 0 follows a lognormal distribution with $\sigma_R = 0.8$ (mean 1e6). For this example, survival is driven only by $M$ (no fishing). Maturity is 50% at age 2 (age-50) with a steep logistic slope; we then infer the implied length at 50% maturity each year using the Base_WestMed $P(L \mid a)$ matrix.
+
+```{r}
+#| label: age-maturity-sim
+set.seed(999)
+years <- 1:20
+ages_pop <- ages
+sigma_R <- 0.8
+mean_rec <- 1e6
+rec <- rlnorm(length(years), log(mean_rec) - 0.5 * sigma_R^2, sigma_R)
+
+M_vec <- M_at_age[1:length(ages_pop)]
+N_mat <- matrix(0, nrow=length(years), ncol=length(ages_pop))
+colnames(N_mat) <- paste0("age_", ages_pop)
+N_mat[,1] <- rec
+
+for (y in 2:length(years)) {
+  for (a in 1:(length(ages_pop)-2)) {
+    N_mat[y, a+1] <- N_mat[y-1, a] * exp(-M_vec[a])
+  }
+  pg <- length(ages_pop)
+  N_mat[y, pg] <- N_mat[y-1, pg-1] * exp(-M_vec[pg-1]) 
+  #+ N_mat[y-1, pg] * exp(-M_vec[pg])
+}
+N_long <- as_tibble(N_mat) |>
+  mutate(year = years) |>
+  pivot_longer(starts_with("age_"), names_to="age_lab", values_to="N") |>
+  mutate(age = as.numeric(sub("age_","", age_lab))) |>
+  select(year, age, N)
+
+# Base_WestMed length-at-age matrix with extended length grid
+L_grid_long <- seq(5, 120, by=0.5)
+base_growth <- growth_scenarios |> filter(scenario == "Base_WestMed")
+
+len_probs_base <- tidyr::crossing(age = ages_pop, L = L_grid_long) |>
+  rowwise() |>
+  mutate(density = dL_given_a(L, age, base_growth$Linf, base_growth$k, base_growth$t0)) |>
+  ungroup() |>
+  group_by(age) |>
+  mutate(p_L_given_a = density / sum(density)) |>
+  ungroup()
+
+# Age-based maturity: 50% at age 2 with steep slope
+p_mat_age <- tibble(age = ages_pop,
+                    p_mat = plogis((age - 2) * 5))
+
+```
+
+```{r}
+#| label: fig-age-ogive
+#| fig-cap: "Age-based maturity ogive with A50 = 2 years."
+ggplot(p_mat_age, aes(age, p_mat)) +
+  geom_line(color="firebrick") +
+  geom_point(color="firebrick") +
+  scale_y_continuous(labels=scales::label_percent(accuracy=1)) +
+  labs(x="Age (yr)", y="Maturity", title="Age-based maturity ogive (A50 = 2 yr)") +
+  theme_few()
+
+```
+
+```{r}
+#| label: fig-recruit
+#| fig-cap: "Simulated age-0 recruitment series (lognormal, sigma = 0.8)."
+ggplot(tibble(year=years, recruitment=rec), aes(year, recruitment)) +
+  geom_col(fill="grey60") +
+  labs(x="Year", y="Recruitment (age 0)", title="Simulated recruitment (lognormal, sigma=0.8)") +
+  theme_few()
+
+calc_L50 <- function(y) {
+  N_y <- N_long |> filter(year == y) |> select(age, N)
+  df <- len_probs_base |>
+    left_join(N_y, by="age") |>
+    left_join(p_mat_age, by="age")
+
+  total_L <- df |>
+    group_by(L) |>
+    summarise(total = sum(N * p_L_given_a, na.rm=TRUE),
+              mature = sum(N * p_L_given_a * p_mat, na.rm=TRUE),
+              .groups="drop")
+
+  if (all(total_L$total == 0)) return(NA_real_)
+  prop <- total_L$mature / total_L$total
+  idx <- which(prop >= 0.5)[1]
+  if (is.na(idx)) return(NA_real_)
+  if (idx == 1) return(total_L$L[1])
+  L1 <- total_L$L[idx-1]; L2 <- total_L$L[idx]
+  p1 <- prop[idx-1]; p2 <- prop[idx]
+  L1 + (0.5 - p1) * (L2 - L1) / (p2 - p1)
+}
+
+L50_ts <- tibble(year = years,
+                 L50_length = purrr::map_dbl(years, calc_L50)) |> filter(year>5)
+
+```
+
+```{r}
+#| label: fig-L50-base
+#| fig-cap: "Implied length at 50% maturity over time (Base_WestMed, age-50=2)."
+ggplot(L50_ts, aes(year, L50_length)) +
+  geom_line(color="steelblue") +
+  geom_point(color="steelblue") +
+  labs(x="Year", y="Implied L50 (cm)", title="Length at 50% maturity implied by age-50=2") +
+  theme_few()
+```
+
+Even with a fixed age-50 at 2 years, the implied length-50 varies across years because recruitment swings change the age structure that feeds into the $P(L \mid a)$ matrix. High recruitment years (more young fish) pull the realized L50 downward; cohorts aging through the population push it upward.
+
+Repeating the same calculation for the Adriatic_SS3 growth option:
+
+```{r}
+adr_growth <- growth_scenarios |> filter(scenario == "Adriatic_SS3")
+
+len_probs_adr <- tidyr::crossing(age = ages_pop, L = L_grid_long) |>
+  rowwise() |>
+  mutate(density = dL_given_a(L, age, adr_growth$Linf, adr_growth$k, adr_growth$t0)) |>
+  ungroup() |>
+  group_by(age) |>
+  mutate(p_L_given_a = density / sum(density)) |>
+  ungroup()
 
 calc_L50_scen <- function(probs_mat) {
   function(y) {
-    N_y <- N_long
+    N_y <- N_long |> filter(year == y) |> select(age, N)
     df <- probs_mat |>
       left_join(N_y, by="age") |>
       left_join(p_mat_age, by="age")
@@ -600,10 +1022,11 @@ L50_adr <- tibble(
 ) |> filter(year>5)
 
 L50_both <- bind_rows(L50_base, L50_adr)
+
 ```
 
 ```{r}
-#| label: fig-growth-sens-L50
+#| label: fig-L50-both
 #| fig-cap: "Implied L50 over time comparing Base_WestMed and Adriatic_SS3 (age-50=2)."
 ggplot(L50_both, aes(year, L50_length, color=scenario)) +
   geom_line() +
@@ -612,403 +1035,15 @@ ggplot(L50_both, aes(year, L50_length, color=scenario)) +
   theme_few()
 ```
 
+
 The Adriatic_SS3 option yields consistently lower implied length-50 because its growth curve keeps lengths smaller at a given age. Interannual variability remains driven by recruitment swings, but the baseline level is pulled down relative to the West Med curve.
 
-## Implications for Assessment and Benchmarking
-
-### Sex-specific slicing
-
-Both WGHKE and STECF recommend:
-
-- Implementing sex-specific slicing for catch and survey length distributions whenever sexed data are available, even if only for a subset of years.
-- Using sex-specific maturity and natural mortality vectors to maintain internal coherence with the growth functions @WGHKE2025; @STECF2506.
-- Building on ICATMAR’s sex-specific LF and L50 series in northern GSA 6 to prototype sex-structured slicing and compare against the current sex-combined approach.
-
-### Revising growth for GSAs 1–5–6–7
-
-Main concerns for the current West-Med combined assessment:
-
-- Tag-based $L_\infty$ (≈ 110 cm) likely overestimates the mean asymptotic length, particularly if based on older, larger individuals and high-variance increments @MellonDuval2010; @WGHKE2025.
-- This can inflate unfished biomass (B₀) and skew depletion-based status metrics.
-- It may propagate into derived quantities such as weight-at-age (via slicing) and reference points.
-
-Short-term guidance (until the benchmark):
-
-- Retain the current curve (Mellon-Duval / ICATMAR-centered VBGF) for continuity, but treat it as a working assumption, not a fixed truth.
-- Conduct sensitivity runs with lower $L_\infty$ informed by adjacent stocks (e.g. borrowing from GSA 8–11 or Central Med), or by internal growth estimation using ALKs in integrated models.
-
-### Integrated models and bi-phasic growth
-
-Integrated Stock Synthesis models have:
-
-- Demonstrated better fits in data-rich areas when growth is estimated inside the model from ALKs and length data @Carbonara2023; @STECF2506.
-- Supported bi-phasic (Schnute–Richards) growth in the Adriatic and Central Med, where early-life growth is faster than a single VBGF would suggest.
-
-For the Western Med benchmark, candidate approaches include:
-
-- A sex-structured Stock Synthesis configuration using multiple fleets (OTB, gillnets, longlines), MEDITS/BALAR as primary survey indices, and historical ALKs for at least a subset of years.
-- A simpler a4a configuration with sex-specific growth and maturity by GSA (or substocks), a revised natural mortality vector (e.g. Chen–Watanabe) @ChenWatanabe1989; @STECF2506, and a multi-fleet or tensor-based F submodel to approximate changing selectivity.
-
-### Practical benchmark messages
-
-For the benchmark terms of reference, you can boil the growth story down to:
-
-- We accept that growth differs among GSAs, with the Western Med having the largest historical $L_\infty$ but likely overestimated.
-- We will not treat GSAs 1–5–6–7 as a closed, homogeneous stock without exploring alternatives supported by MED_UNITs, TRANSBORAN, and local monitoring (e.g. ICATMAR).
-- We will prioritize candidate models that:
-  - Are sex-structured,
-  - Allow multi-fleet selectivity,
-  - Use growth in a way that is coherent with ALKs and observed length structure, and
-  - Are robust to mis-specified growth via sensitivity testing.
-
-# STECF 25-06 Scenarios and Their Implications
-
-The STECF EWG 25-06 explored a structured set of assessment scenarios to evaluate
-how updated data inputs, revised survey indices, modified natural mortality vectors,
-and alternative fishing mortality sub-models influence the combined hake assessment for
-GSAs 1–5–6–7. The scenarios represent incremental steps away from the current
-configuration toward future benchmark-ready approaches @STECF2506.
-
-### Scenario 2.2 — 2025 Base Case with Updated Data and MEDITS-2020 Set to NA
-
-Scenario 2.2 represents the “clean” update of the existing a4a model:
-
-- Uses all revised input data through **2024**, including corrected MEDITS series.
-- Replaces the 2020 MEDITS index with **NA**, allowing the model to estimate that
-value indirectly rather than rely on a reconstructed series.
-- Maintains the **current f-model**, **current natural mortality vector**, and **current
-growth assumptions**.
-
-Key outcomes:
-
-- Overall dynamics remain consistent with the 2024 assessment.
-- A mild decline in fishing mortality since 2020 appears, not visible in earlier
-assessments.
-- Retrospective patterns improve slightly when 2020 is set to NA.
-- Provides the most internally consistent “status quo” configuration for continuity.
-
-### Scenario 3.2 — Tensor-Based Fishing Mortality with BALAR + MEDITS (2002–2024)
-
-Scenario 3.2 extends the time series and explicitly introduces a more flexible fishing mortality
-structure:
-
-- Merges MEDITS with **BALAR (2002–2006)** to extend the GSA 5 series backward.
-- Expands the assessment window to **2002–2024**.
-- Introduces a **tensor smooth (te(age,year))** in the F-submodel to capture
-time-varying selectivity due to:
-  - gear changes,
-  - loss of longliners,
-  - adoption of square-mesh codends,
-  - effort reduction under EUMAP.
-
-Key outcomes:
-
-- Identifies temporal shifts in selectivity affecting age-0 and older age groups.
-- Produces fits similar in quality to the base case but more biologically coherent
-with observed fleet dynamics.
-- Recovers slightly different recruitment and SSB trajectories in the early period.
-
-Scenario 3.2 is the closest to a benchmark-capable a4a model.
-
-### Scenario 3.4 — Tensor F-Model + Chen–Watanabe Natural Mortality
-
-Scenario 3.4 combines:
-
-- the extended BALAR+MEDITS index (2002–2024),
-- the **tensor product** fishing mortality smoother,
-- and the **Chen–Watanabe (1989)** natural mortality vector selected by STECF
-for its robustness to model mis-specification @ChenWatanabe1989; @STECF2506.
-
-Key outcomes:
-
-- Recruitment levels are lower (due to reduced M at age-0).
-- SSB trends remain directionally similar but shift upward or downward depending
-on age structure of the slice.
-- F-bar levels slightly lower in the terminal years relative to the current M vector.
-- Retrospective patterns for F improve in magnitude but remain present.
-
-Scenario 3.4 is identified in STECF 25-06 as a strong candidate for future work because
-it aligns updated data inputs, improved F-structure, and a quantitatively defended
-natural mortality model.
-
-## Candidate Models to be Explored (Reviewer’s Recommendations)
-
-Based on the STECF 25-06 analyses and the requirements of the upcoming
-benchmark process, the following candidate models are proposed for exploration
-in order of increasing complexity.
-
-### (A) Enhanced a4a Configuration (Benchmark-Light)
-
-A direct extension of Scenario 3.4 with:
-
-- Sex-specific slicing (if operational by data-prep time),
-- Chen–Watanabe M vector,
-- Tensor-based fishing mortality,
-- BALAR-extended MEDITS series (2002–2024),
-- Sensitivity runs with updated growth curves (lower $L_\infty$).
-
-Purpose:  
-Provide a “drop-in” improved a4a model that is transparent, reproducible, and suitable
-for rapid yearly advice even after the benchmark.
-
-### (B) A4A With Sex-Structured Catch and Survey
-
-This intermediate configuration would:
-
-- Use sex-specific VBGF parameters (Mellon-Duval 2010 or updated alternatives),
-- Recalculate catch-at-age by sex,
-- Apply sex-specific maturity and natural mortality vectors,
-- Retain a4a’s simpler statistical structure.
-
-Purpose:  
-Quantify how much of current model behaviour is driven by sex mixing and whether
-internal consistency improves.
-
-### (C) Stock Synthesis (SS3) Sex-Structured, Multi-Fleet Model
-
-A benchmark-grade model enabling:
-
-- Full sex structure,
-- Multi-fleet selectivity (trawl, gillnet, longline, OTT),
-- Time-varying selectivity (smooth or block-based),
-- Internal estimation of growth using ALKs where available,
-- Integrated handling of survey and composition data.
-
-Purpose:  
-Serve as a “high-resolution” candidate model to evaluate structural uncertainty and
-provide diagnostics not possible in a4a (e.g. growth bias tests, conditional age-at-length).
-
-### (D) Bi-phasic Growth Extension (Schnute–Richards)
-
-For Central/Adriatic GSAs this is already used.  
-For West Med it would be exploratory only.
-
-Purpose:  
-Test whether early-life growth is mis-specified under a single VBGF,
-and whether this affects slicing, recruitment patterns, or the relative contribution
-of age-0/age-1 fish to the population.
-
-### (E) SPiCT as a Cross-Check (Not for Advice)
-
-Only useful when:
-
-- using longline/gillnet LPUE as auxiliary adult biomass signals, or
-- conducting cross-model consistency checks.
-
-Purpose:  
-Aid exploration of adult trends independently from the MEDITS-dominated index.
-
-## Summary of Model Path
-
-The STECF 25-06 scenarios establish a clear path:
-
-- Scenario 2.2 provides the stable “continuity” model.  
-- Scenario 3.2 provides improved selectivity realism.  
-- Scenario 3.4 provides the most defensible biological configuration (new M, tensor F).
-
-The recommended candidate models build directly on this sequence, extending it into
-sex-structure, integrated growth, and multi-fleet selectivity as needed for the benchmark.
-
-# Bycatch and Species Composition 
-
-European hake represents a relatively small share of the Balearic trawl fishery. Across
-all years examined, hake accounts for only **4–7%** of the total commercial biomass in
-GSA 5 (STECF 25-06), confirming the multispecific character of the fishery @STECF2506.
-The updated stock-boundary analysis for the Balearic Islands provides a detailed view of
-the species mix and ecosystem context driving these patterns @Quetglas2012.
-
-## Species Composition of Commercial Landings (GSA 5)
-
-The figure *“Landings target species (%)”* in the Balearic analysis shows that the GSA 5
-trawl fishery is dominated by a small number of crustacean species, with fish species
-including hake forming a secondary component.
-
-```{r}
-#| label: tbl-gsa5-species-composition
-#| echo: false
-#| message: false
-#| warning: false
-
-species <- data.frame(
-  Species = c(
-    "Aristeus antennatus (red shrimp)",
-    "Parapenaeus longirostris (rose shrimp)",
-    "Mullus spp. (red mullets)",
-    "Merluccius merluccius (hake)",
-    "Nephrops norvegicus"
-  ),
-  `Approx. Biomass Share (%)` = c(36, 14, 12, 4, 11),
-  `Approx. Value Share (%)`  = c(40, 15, 10, 6, 12),
-  `Notes` = c(
-    "Deep-water shrimp; major target in GSA 5",
-    "Upper-slope crustacean; important component",
-    "Shelf-associated; habitat-dependent variability",
-    "Minor share of landings; biological importance",
-    "Variable across slope and shelf"
-  )
-)
-
-knitr::kable(
-  species,
-  caption = "Approximate species composition of GSA 5 landings (biomass and value) based on the Quetglas et al. (2012) update @Quetglas2012.",
-  booktabs = TRUE
-)
-```
-
-Values represent approximate proportions inferred visually from the biomass and value
-barplots on the GSA 5 panel.
-
-## GSA 1–GSA 6 Comparison of Target Species (Biomass and Value)
-
-Using the same *“Landings target species (%)”* slide, we can summarize the relative
-importance of the main target species in GSAs 1, 5 and 6 qualitatively in terms of biomass
-and value.
-
-```{r}
-#| label: tbl-gsa1-5-6-target-species
-#| echo: false
-#| message: false
-#| warning: false
-
-comp <- data.frame(
-  GSA = c("1", "1", "1", "5", "5", "5", "6", "6", "6"),
-  Species = c(
-    "Aristeus antennatus",
-    "Merluccius merluccius",
-    "Mullus spp.",
-    "Aristeus antennatus",
-    "Merluccius merluccius",
-    "Mullus spp.",
-    "Aristeus antennatus",
-    "Merluccius merluccius",
-    "Mullus spp."
-  ),
-  `Biomass Importance` = c(
-    "High",    # GSA1 ARA
-    "Low",     # GSA1 HKE
-    "Medium",  # GSA1 MUX
-    "High",    # GSA5 ARA
-    "Low",     # GSA5 HKE
-    "Medium",  # GSA5 MUX
-    "Medium",  # GSA6 ARA
-    "Medium",  # GSA6 HKE
-    "Medium"   # GSA6 MUX
-  ),
-  `Value Importance` = c(
-    "High",
-    "Low–Medium",
-    "Medium",
-    "High",
-    "Medium",
-    "Medium",
-    "High",
-    "Medium",
-    "Medium"
-  )
-)
-
-knitr::kable(
-  comp,
-  caption = "Qualitative comparison of target species importance in GSAs 1, 5 and 6 in terms of biomass and value (derived from Quetglas et al. 2012 updated figures).",
-  booktabs = TRUE
-)
-```
-
-This emphasizes that:
-
-- GSAs 1 and 5 are strongly dominated in biomass and value by *Aristeus antennatus*
-  and other crustaceans.
-- GSA 6 has a more balanced mix of crustaceans and fish (including hake and red mullet),
-  with higher relative importance of hake than in GSA 5.
-
-## Discards and Bycatch Characteristics
-
-The structure and ecological setting of the Balearic shelf results in exceptionally high
-discard fractions compared to mainland GSAs:
-
-- **55–70%** of total catch on the shallow shelf consists of **algae, echinoderms and non-commercial invertebrates**, rather than small fish.
-- Mainland areas (e.g., GSA 6) show **much lower discard fractions** (23–48%) with fish dominating the discard stream.
-- This reflects strong differences in bottom type, productivity, and community structure @Quetglas2012.
-
-```{r}
-#| label: tbl-gsa5-discard
-#| echo: false
-#| message: false
-#| warning: false
-
-discard <- data.frame(
-  Category = c("Shallow-shelf discards", "Deep-slope discards", "Dominant discard groups"),
-  `GSA 5` = c("55–70%", "~20–30%", "Algae, echinoderms, sessile invertebrates"),
-  `GSA 6` = c("23–48%", "~20–35%", "Small fish, benthic fish, invertebrates")
-)
-
-knitr::kable(
-  discard,
-  caption = "Comparison of discard characteristics between GSA 5 and GSA 6 (page 6 of Quetglas et al. 2012 update).",
-  booktabs = TRUE
-)
-```
-
-## Elasmobranch Bycatch and Diversity
-
-The Balearic Islands display some of the highest elasmobranch species richness in the
-entire Western Mediterranean:
-
-- **18×** more abundant,
-- **19×** higher biomass, and
-- **7×** higher species richness than GSA 6 on the 50–100 m shelf @Quetglas2012.
-
-This makes elasmobranchs (particularly *Scyliorhinus canicula*, *Etmopterus spinax*,
-*Galeus melastomus*) a consistently large bycatch group in GSA 5.
-
-## Habitat-Driven Differences in Assemblages
-
-Habitat contrasts between the Balearic Islands and mainland Spain drive sharp differences
-in species caught:
-
-- Red algae beds (maërl & *Peyssonellia* beds) exist deeper in GSA 5, allowing trawling to operate on habitats that do not occur at equivalent depths in GSA 6.
-- *Mullus barbatus* dominates soft-bottom shelf catches in GSA 5, whereas *Mullus surmuletus* is more abundant in GSA 6.
-- As the Balearic shelf is disconnected from the mainland by 800–2000 m depths, slope communities differ strongly and contribute to distinct mixed-catch assemblages.
-
-## Visual Summary
-
-```{r}
-#| label: fig-gsa5-bycatch-summary
-#| fig-cap: "Schematic summary of main species groups contributing to GSA 5 mixed catches."
-#| echo: false
-#| warning: false
-#| message: false
-
-df <- data.frame(
-  Group = c("Red shrimp", "Rose shrimp", "Red mullets", "Hake", "Norway lobster", "Elasmobranchs", "Non-commercial discards"),
-  Share = c(36, 14, 12, 4, 11, 8, 15)
-)
-
-ggplot(df, aes(x = reorder(Group, Share), y = Share)) +
-  geom_col(fill = "#2E86AB") +
-  coord_flip() +
-  theme_minimal() +
-  labs(
-    x = "",
-    y = "Relative Share (approx. %)",
-    title = "Approximate Contribution of Major Species / Groups in GSA 5 Catches"
-  )
-```
-
-### Summary
-
-The Balearic Islands demersal fishery differs substantially from adjacent mainland GSAs.
-Although hake is biologically important, it makes up a minor fraction of landings.
-Bycatch consists primarily of crustaceans, elasmobranchs, red mullets, and high discard
-volumes dominated by non-commercial invertebrates. These patterns underscore the need
-to treat GSA 5 as a distinctive ecological and fishery unit when interpreting mixed-fleet
-data for the hake assessment.
 
 # MEDITs exploratory plots (HKE)
 
-This section folds in the exploratory notebook for MEDITs haul, species-total, and length data for hake (files a, b, c). The scripts were drafted from informal queries and should be reviewed before reuse, but having them here keeps the survey diagnostics with the growth material.
+This section folds in the earlier MEDITs exploratory notebook so survey diagnostics and growth slicing live together under one table of contents. The scripts were drafted from informal queries; please review before reuse.
 
-## Data setup
+### Data setup
 
 ```{r}
 #| label: medits-data
@@ -1630,7 +1665,7 @@ hake_len |>
   theme_minimal()
 ```
 
-## Consideration of other CPUE indices
+# Consideration of other CPUE indices
 
 To complement the survey indices, we can explore fishery-dependent signals using trawl effort and catch as an approximate nominal CPUE series shared in ITCAM GSA6 presentations. The following illustrative plots normalize effort and catch, then compare catch per horsepower and catch per TRB as simple proxies. These series should be treated cautiously—they are not standardized and reflect indicative trends only.
 
@@ -1683,7 +1718,7 @@ ggplot(dat_ratios, aes(Year, value, color = ratio)) +
 ```
 
 
-## References
+# References
 
 ::: {#refs}
 :::
