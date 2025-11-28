@@ -8,9 +8,6 @@ format:
     number-sections: true
     self-contained: true
     code-fold: true
-  pdf:
-    toc: true
-    number-sections: true
 fontsize: 11pt
 execute:
   echo: true
@@ -21,6 +18,11 @@ bibliography: references.bib
 ---
 
 # Executive Summary {#exec-summary .unnumbered}
+
+This is a review assembled over a short period with the help of software that assisted in interrogating documents and databases.
+The notes attempt to prioritize the most visible strengths, gaps, and 
+near-term risks rather than a full re-analysis. Treat the points below as intended constructive suggestions 
+to support follow-up work ([GitHub repo](https://github.com/jimianelli/HKE_1567_report)).
 
 Relative to growth:
 
