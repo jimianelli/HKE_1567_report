@@ -48,7 +48,23 @@ Other comments:
   - MEDITs exploration highlights strong spatial/temporal heterogeneity in densities, lengths, and sex ratios across GSAs, underscoring the need for GSA-specific diagnostics.
   - For a4a models evaluate stochastic growth in slicing and rototype sex-specific slicing where data allow.
 
-# Overview
+
+```{r}
+#| label: setup
+#| echo: false
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(stringr)
+library(ggthemes)
+library(qs)
+library(ggridges)
+```
+
+# Biological and Population Context
+
+## Overview
 
 These notes attempt to synthesize information from the provided GFCM and STECF sources relevant
 to European hake (*Merluccius merluccius*) in the Mediterranean (GSAs 1–5–6–7). 
@@ -67,21 +83,6 @@ As part of the review these notes give:
 - Practical implications for slicing, model choice, and benchmark planning.
 - Some draft evaluations of Medits data for easier compmarisons over GSAs
 
-
-```{r}
-#| label: setup
-#| echo: false
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(purrr)
-library(stringr)
-library(ggthemes)
-library(qs)
-library(ggridges)
-```
-
-# Biological and Population Context
 
 ## Stock structuring and implications for growth
 
