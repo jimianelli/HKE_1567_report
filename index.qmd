@@ -25,6 +25,8 @@ bibliography: references.bib
 Relative to growth:
 
   - WestMed tagging-based VBGF ($L_\infty$ ≈ 110 cm, k ≈ 0.178) remains the operational baseline; Adriatic/Central Med curves are smaller, and growth uncertainty should be carried through slicing rather than fixed.
+  - The Medits tables lacked columns showing individual fish weight (that I could find). Having these data for perusal could help with some of the stock delineation issues and patterns on condition factors.
+    - similarly, GSI data were shown for some areas (N GSA 6?), the pattern seemed to show some variable seasonality that should be explored further (actually those data must be from fishery collections because they showed many months of the year (Medits is only a few months per year depending on GSA).
   - Synthetic LFD tests show slicing outcomes are sensitive to modest shifts in $L_\infty$ and $k$; lower $L_\infty$ or higher $k$ moves catch-at-age toward younger ages and lowers implied L50.
 
 For the assessment benchmark
