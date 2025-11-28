@@ -1,0 +1,1685 @@
+---
+title: "GFCM GSA 1, 5, 6, 7 hake notes "
+author: "Jim Ianelli"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    self-contained: true
+    code-fold: true
+  pdf:
+    toc: true
+    number-sections: true
+fontsize: 11pt
+execute:
+  echo: true
+  warning: false
+  message: false
+lightbox: true
+bibliography: references.bib
+---
+
+# Executive Summary {#exec-summary .unnumbered}
+
+Relative to growth:
+
+  - WestMed tagging-based VBGF ($L_\infty$ ≈ 110 cm, k ≈ 0.178) remains the operational baseline; Adriatic/Central Med curves are smaller, and growth uncertainty should be carried through slicing rather than fixed.
+  - Synthetic LFD tests show slicing outcomes are sensitive to modest shifts in $L_\infty$ and $k$; lower $L_\infty$ or higher $k$ moves catch-at-age toward younger ages and lowers implied L50.
+
+For the assessment benchmark
+
+  - For combined GSA model runs, consideration of within GSA indicators should be provided so that consistency or lack thereof between GSAs can be considered
+  - For SS3 configurations, data should minimally be provided at the quarter-of-the year resolution by gear and where plausible, metier. The rationale here is to improve the ability to estimate recruitment from different times within years. Without doing this, it is likely that the ability to use appropriately conditioned variation in lengths-given-age and reasonably resolve a single growth curve.
+    - The catch biomass data should be at the finest level of the within GSA fleet and quarter level. 
+    - Length freqency data should be proportional to the catch for fishery data (absolute numbers-at-length are unnecessary)
+    - Some indication of LF sampling intensity should be available (e.g., number of hauls or trips sampled)
+    - Where catch biomass reliability changes, it should be noted (uncertainty of catch)
+    - Survey index data should note where there are lapses in distribution of tows etc. This may help to acknowledge changes in the fish's "availability" to the survey
+  
+
+Other comments: 
+
+  - Nominal trawl CPUE proxies (catch per HP/TRB) might be considered in future assessments or presented as a separate stock indicator. Approximate nominal rates indicate trends but are unstandardized and should be treated cautiously.
+  - MEDITs exploration highlights strong spatial/temporal heterogeneity in densities, lengths, and sex ratios across GSAs, underscoring the need for GSA-specific diagnostics.
+  - For a4a models evaluate stochastic growth in slicing and rototype sex-specific slicing where data allow.
+
+# Overview
+
+These notes attempt to synthesize information from the provided GFCM and STECF sources relevant
+to European hake (*Merluccius merluccius*) in the Mediterranean (GSAs 1–5–6–7). 
+
+- The MED_UNITs synthesis on stock structuring and biological units @Spedicato2022.
+- The GFCM Ad-hoc Working Group on European Hake (WGHKE) report (Rome, March 2025) @WGHKE2025.
+- The STECF Ad-hoc Hake Assessment (EWG 25-06) @STECF2506.
+- The European hake growth study in the Gulf of Lions @MellonDuval2010.
+- Benchmark work for Adriatic and Central Mediterranean hake stocks @Carbonara2023; @Spedicato2022.
+- ICATMAR complementary biological data for northern GSA 6, including historical growth parameters and VBGF curves by sex for the WestMed stock unit.
+
+As part of the review these notes give:
+
+- A concise comparison of growth parameters across GSAs.
+- A record of how these differences intersect with the current combined assessment for GSAs 1–5–6–7.
+- Practical implications for slicing, model choice, and benchmark planning.
+- Some draft evaluations of Medits data for easier compmarisons over GSAs
+
+
+```{r}
+#| label: setup
+#| echo: false
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(stringr)
+library(ggthemes)
+library(qs)
+library(ggridges)
+```
+
+# Biological and Population Context
+
+## Stock structuring and implications for growth
+
+The MED_UNITs project used genetic markers (SNPs), otolith shape, otolith microchemistry,
+and environmental covariates to delineate biological units of European hake across the
+Mediterranean @Spedicato2022.
+
+Key points:
+
+- Clear separation between Atlantic and Mediterranean hake.
+- Within the Mediterranean, evidence for three main population groups: Western, Central, and Eastern.
+- Otolith shape yields four robust clusters (Atlantic, Western Med, Adriatic, Eastern Med), aligning well with the genetic structuring.
+- Otolith microchemistry alone has weaker classification power and higher temporal variability, making it less reliable for fine-scale stock boundaries.
+
+While MED_UNITs does not provide new growth curves, the consistent regional
+differentiation supports the hypothesis that growth parameters differ among subregions and
+that using a single VBGF across the basin is biologically unrealistic.
+
+## Sexual dimorphism
+
+All major sources agree that European hake shows strong sexual dimorphism in growth:
+
+- Females attain substantially larger asymptotic lengths than males.
+- Males mature earlier at smaller sizes and rarely approach the female $L_\infty$.
+- Sex-specific growth has been implemented in several recent benchmarks (Adriatic, Strait of Sicily, and GSA 19 trials) using integrated models such as Stock Synthesis @Carbonara2023; @STECF2506; @WGHKE2025.
+- ICATMAR’s northern GSA 6 monitoring confirms this pattern: males dominate small sizes and rarely exceed ~45 cm, whereas females make up almost all of the largest length classes in local LFDs.
+
+For GSAs 1–5–6–7, current combined assessments still rely primarily on sex-aggregated
+slicing, though both WGHKE and STECF explicitly recommend moving to sex-specific slicing
+whenever possible @WGHKE2025; @STECF2506.
+
+---
+
+## Overview
+
+This note summarizes what **length-frequency (LF)** data exist by GSA (1, 5, 6, 7) for European hake and how these are converted into **age compositions** for recent STECF/GFCM work. No validated age–length keys (ALKs) or otolith-based age data are currently used for these GSAs; all age data are reconstructed from LF using von Bertalanffy growth parameters (Mellon-Duval et al. 2010; updated in the a4a/FLR framework as a stochastic VBGF centered on Linf ≈ 110 cm, k ≈ 0.178, t0 ≈ −0.04).
+
+All GSAs share the following general features:
+
+- Commercial LF data are available from DCF sampling since 2002 (longer in some GSAs via national sources).
+- MEDITS survey LF data are available from 2002 onward (with 2020 problematic and treated as missing/NA in the index).
+- Catch-at-age and survey-at-age are **fully derived** from LF via deterministic (and, in future, quarterly/stochastic) slicing.
+
+### GSA 1 – Northern Alboran Sea
+
+- Commercial LF:
+  - IEO historical landings and LF back to ~2001; DCF LF consistently from 2002 onward.
+- Survey LF:
+  - MEDITS LF from 2002 onward, except 2020 (no survey; treated as NA in the tuning index).
+- Direct age data:
+  - None (no validated ALKs or age-readings supplied).
+- Derived age data:
+  - Catch-at-age and survey-at-age obtained by slicing LF with sex-combined VBGF.
+  - Quarterly/stochastic slicing with age-0 → age-1 in Q1–Q2 has been developed but is not yet the operational standard.
+
+### GSA 5 – Balearic Islands
+
+- Commercial LF:
+  - Landings time series from 1940; LF data from ~1980 onward (IEO/COISPA and related work).
+- Survey LF:
+  - BALAR bottom trawl surveys (2002–2006) using MEDITS gear and protocol.
+  - MEDITS surveys from 2007 onward (eastern and western islands since 2021).
+- Direct age data:
+  - None submitted (no ALKs used in current assessments).
+- Derived age data:
+  - Combined BALAR+MEDITS LF are sliced to produce survey-at-age.
+  - Commercial LF sliced with sex-combined VBGF; quarterly/stochastic variants explored.
+  - GSA 5 also used to test large-hake LPUE (size-category based), but these indices are not yet used as assessment tuning data.
+
+### GSA 6 – Northern Spain
+
+- Commercial LF:
+  - DCF LF for 2002–2024; longer national series from IEO and ICATMAR (including effort and gear-specific details).
+- Survey LF:
+  - MEDITS LF for all years except 2020 (partial survey; 2020 index omitted/NA).
+- Direct age data:
+  - None (no ALKs or agreed ageing protocol).
+- Derived age data:
+  - Catch-at-age obtained by LF slicing (sex-combined VBGF; stochastic quarterly slicing tested in EWG 25-06).
+  - Additional ICATMAR information (sex ratios, longline and gillnet LPUE, historical VBGF by assessment area) is available and useful for diagnostics but not yet structurally integrated as an age-based index.
+
+### GSA 7 – Gulf of Lions (France and Spain)
+
+- Commercial LF:
+  - DCF LF for 2002–2024 from both France and Spain.
+- Survey LF:
+  - MEDITS LF for all years except 2020 (survey shifted to autumn; 2020 treated as NA).
+- Direct age data:
+  - None (no ALKs provided; no common ageing protocol in use).
+- Derived age data:
+  - Catch-at-age reconstructed from LF via slicing (sex-combined growth).
+  - France supplies quarterly sex-ratio-by-length data (2011–2024), used to build a synthetic sex-ratio curve; these support future sex-specific slicing but are not yet used in the operational a4a input.
+
+## LFD Comparison Table
+
+```{r}
+#| label: tbl-lfd-comparison
+#| echo: false
+#| message: false
+#| warning: false
+
+lfd <- data.frame(
+  GSA = c("1", "5", "6", "7"),
+  Commercial_LF_coverage = c(
+    "IEO LF from ~2001, DCF LF from 2002 onward",
+    "Landings since 1940; LF since ~1980",
+    "DCF LF 2002–2024; longer national series",
+    "DCF LF 2002–2024 (France + Spain combined)"
+  ),
+  Survey_LF_coverage = c(
+    "MEDITS LF 2002–; 2020 missing (NA in index)",
+    "BALAR LF 2002–2006; MEDITS LF 2007–",
+    "MEDITS LF except 2020 (NA)",
+    "MEDITS LF except 2020 (NA, autumn survey)"
+  ),
+  Direct_age_data = c("No", "No", "No", "No"),
+  Age_data_used = c(
+    "All ages from LF slicing (sex-combined VBGF; quarterly/stochastic method under development)",
+    "BALAR+MEDITS LF sliced to age; commercial LF sliced with same VBGF; large-hake LPUE exploratory only",
+    "LF-based catch-at-age; ICATMAR LPUE and sex/length info used diagnostically, not as age data",
+    "LF-based age compositions; sex-ratio by length available but not yet used for sex-specific age input"
+  )
+)
+
+knitr::kable(
+  lfd,
+  caption = "Length-frequency data coverage and derived age data usage by GSA.",
+  booktabs = TRUE
+)
+```
+
+## LF only (no age data)
+
+- There are **no observed ages** (ALKs or otolith age-readings) in the current operational workflow for GSAs 1, 5, 6, and 7.
+- All age compositions, both for commercial catches and MEDITS/BALAR surveys, are reconstructed from LF via growth-based slicing.
+- The main near-term improvements identified are:
+  - Adoption of quarterly and stochastic slicing (with biologically consistent handling of age-0),
+  - Introduction of sex-specific growth and slicing once data preparation and tools are mature,
+  - Future incorporation of ALKs if and when robust ageing protocols and intercalibration are in place.
+
+# Comparative Growth Parameters (VBGF)
+
+## Combined-sex growth
+
+The table below compiles key VBGF parameter sets for combined sexes from the
+uploaded material and recent EWG 25-06 growth work.
+
+```{r}
+#| label: tbl-combined-growth
+#| echo: false
+#| message: false
+#| warning: false
+#| tbl-cap: "Approximate combined-sex VBGF parameters by region and source."
+
+combined <- data.frame(
+  Region = c(
+    "GSAs 1–5–6–7", 
+    "GSAs 1–5–6–7", 
+    "GSAs 17–18 (Adriatic)", 
+    "GSA 19 (Ionian)"
+  ),
+  Source = c(
+    "Mellon-Duval 2010 (tagging)",
+    "STECF 25-06 / ICATMAR-FLR VBGF",
+    "Adriatic SS3 benchmark",
+    "GSA 19 SS3 trial"
+  ),
+  Linf_cm = c(110, 109.6, 88, 90),
+  k       = c(0.178, 0.178, 0.20, 0.20),
+  t0      = c(-0.005, -0.036, -0.10, -0.10)
+)
+
+knitr::kable(combined, booktabs = TRUE, align = c("l", "l", "c", "c", "c"))
+```
+
+Notes:
+
+- The Mellon-Duval curve (Gulf of Lions) @MellonDuval2010 is effectively the traditional default for GSAs 1–5–6–7 in the current a4a configuration.
+- EWG 25-06 and the ICATMAR/a4a-FLR work implement a **stochastic** VBGF centered on essentially the same parameters ($L_\infty$ ≈ 109.6 cm, k ≈ 0.178, t0 ≈ −0.04), with uncertainty carried through slicing rather than changing the mean curve.
+- Both WGHKE and STECF highlight that this $L_\infty$ (≈ 110 cm) is strongly influenced by tagging increment data, which tends to pull $L_\infty$ toward maximum observed lengths and may not correspond to mean asymptotic length @WGHKE2025; @STECF2506.
+- In contrast, integrated models in the Adriatic (GSAs 17–18) and Central Med (GSA 19) estimate lower combined-sex $L_\infty$ (≈ 88–90 cm), especially when growth is estimated from ALKs within Stock Synthesis @Carbonara2023; @STECF2506.
+
+## Sex-specific growth
+
+The next table summarizes sex-specific VBGF parameters used or discussed for
+different regions.
+
+```{r}
+#| label: tbl-sex-growth
+#| echo: false
+#| message: false
+#| warning: false
+#| tbl-cap: "Approximate sex-specific VBGF parameters by region and source."
+
+sex_df <- data.frame(
+  Region = c(
+    "GSAs 1–5–6–7", "GSAs 1–5–6–7",
+    "GSA 8–11", "GSA 8–11",
+    "GSAs 17–18", "GSAs 17–18",
+    "GSA 19", "GSA 19"
+  ),
+  Sex = c("Female", "Male", "Female", "Male", "Female", "Male", "Female", "Male"),
+  Source = c(
+    "Mellon-Duval 2010", "Mellon-Duval 2010",
+    "WGHKE 2025", "WGHKE 2025",
+    "Adriatic SS3", "Adriatic SS3",
+    "GSA 19 SS3", "GSA 19 SS3"
+  ),
+  Linf_cm = c(105, 73, 95, 60, 90, 65, 95, 70),
+  k       = c(0.236, 0.233, 0.16, 0.265, 0.20, 0.24, 0.20, 0.25),
+  t0      = c(0.0, 0.0, -0.06, -0.06, -0.10, -0.10, -0.10, -0.10)
+)
+
+knitr::kable(sex_df, booktabs = TRUE, align = c("l", "c", "l", "c", "c"))
+```
+
+Observations:
+
+- In GSAs 1–5–6–7, females have $L_\infty$ ≈ 100–105 cm, males ≈ 70–75 cm, with similar k; this is consistent with @MellonDuval2010 and with the ICATMAR compilation of historical VBGF-by-sex for the WestMed stock unit.
+- In GSA 8–11, sex-specific curves are clearly smaller for females ($L_\infty$ = 95 cm) and males ($L_\infty$ = 60 cm) relative to GSAs 1–5–6–7 @WGHKE2025.
+- Adriatic and Central Med (GSAs 17–18 and 19) show $L_\infty$ in the range 90–95 cm for females, lower than the West Med tagging-based estimates @Carbonara2023; @STECF2506.
+- EWG 25-06 concluded that, given current evidence (including ICATMAR growth work), there is no strong empirical basis yet to replace the WestMed VBGF, but that growth uncertainty should be propagated explicitly (stochastic slicing, alternative $L_\infty$ sensitivities) rather than treated as fixed truth.
+
+
+## Gradient in $L_\infty$ across the basin
+
+The plot below shows a schematic gradient in female $L_\infty$ across broad regions.
+
+```{r}
+#| label: fig-linf-gradient
+#| fig-cap: 'Schematic gradient of female $L_\infty$ across broad Mediterranean regions.'
+#| echo: false
+#| message: false
+#| warning: false
+
+library(ggplot2)
+
+linf_regions <- data.frame(
+  Region = factor(
+    c("West (1–5–6–7)", "West Adjacent (8–11)", "Central (17–18, 19)", "Eastern"),
+    levels = c("West (1–5–6–7)", "West Adjacent (8–11)", "Central (17–18, 19)", "Eastern")
+  ),
+  Linf_cm = c(105, 95, 92, 90)
+)
+
+ggplot(linf_regions, aes(Region, Linf_cm)) +
+  geom_col() +
+  theme_minimal() +
+  labs(
+    x = "",
+    y = expression(L[infinity]~"(cm)"),
+    title = expression(Approximate~Female~L[infinity]~"by Subregion")
+  )
+```
+
+Interpretation:
+
+- The highest $L_\infty$ for females is consistently in the Western Med combined (1–5–6–7), especially when tagging information is included.
+- Adjacent Western Med (8–11) and Central Med (17–18, 19) show somewhat lower $L_\infty$, even before considering bi-phasic growth.
+- Eastern Med is data-poorer in these documents, but where estimates exist, they generally do not exceed the West-Med tagging-based values.
+
+## Schematic “growth map” by GSA
+
+```{r}
+#| label: tbl-gsa-growth-map
+#| echo: false
+#| message: false
+#| warning: false
+#| tbl-cap: "Qualitative summary of growth-related features by GSA."
+
+map_tbl <- data.frame(
+  GSA = c("1", "3", "4", "5", "6", "7", "8–11", "17–18", "19", "22–27"),
+  Subregion = c("West", "West", "West", "West", "West", "West", "West Adjacent", "Central", "Central", "East"),
+  Growth_Comment = c(
+    "High $L_\\infty$; combined assessment; tagging-based",
+    "Distinct growth; TRANSBORAN boundary with GSA 1",
+    "Potential bias from age-0 sampling; slower than 1–5–6–7",
+    "Part of combined stock; BALAR survey provides additional structure",
+    "Intense exploitation; strong truncation of larger sizes; ICATMAR LF show males truncating near 45 cm while females dominate larger sizes",
+    "Mixed fleets (ESP+FRA); gillnets/longlines historically important",
+    "Lower female $L_\\infty$; sex-specific slicing in stock setup",
+    "Lower $L_\\infty$; bi-phasic SS3 growth preferred",
+    "Sex-structured SS3; moderate $L_\\infty$; multi-fleet fishery",
+    "Wide size range; less truncated length structure"
+  )
+)
+
+knitr::kable(map_tbl, booktabs = TRUE, align = c("c", "l", "l"))
+```
+
+## Growth slicing sensitivity (synthetic LFD)
+
+This section summarizes the synthetic slicing experiment used to gauge how alternative growth assumptions propagate into catch-at-age from length–frequency data. Growth follows a von Bertalanffy growth function (VBGF) with normally distributed length error; conditional age probabilities `P(a | L)` are derived with Bayes’ rule and applied to a synthetic LFD. The experiment also compares implied L50 under different growth options and adds nominal CPUE proxies from fishery trawl effort.
+
+### Growth curves and \(P(a \mid L)\)
+
+The VBGF for expected length at age is
+
+$$
+L(a) = L_\infty \bigl(1 - e^{-k\,(a - t_0)}\bigr),
+$$
+
+with observed lengths distributed as $$
+L \mid a \sim \mathcal N\!\left(L(a),\, \sigma_L^2\right).
+$$
+
+For two size-at-age anchors $(A_1, L_1)$ and $(A_2, L_2)$, the curve can be reparameterized as
+
+$$
+L_t = L_\infty + (L_1 - L_\infty)e^{-k\,(t-A_1)}, \qquad
+L_\infty = L_1 + \frac{L_2 - L_1}{1 - e^{-k\,(A_2 - A_1)}}.
+$$
+
+Four options are compared: `Base_WestMed` (tagging-informed West Med curve, 110 cm, $k = 0.178$, $t_0 \approx 0$), `Lower_Linf` (95 cm, slightly faster $k$), `Higher_k` (110 cm, steeper $k$), and `Adriatic_SS3` (88 cm, earlier $t_0$).
+
+```{r}
+#| label: growth-sens-def
+vb_len <- function(age, Linf, k, t0) Linf * (1 - exp(-k * (age - t0)))
+
+growth_scenarios <- tibble::tribble(
+  ~scenario,         ~Linf, ~k,     ~t0,
+  "Base_WestMed",     110,  0.178, -0.005,
+  "Lower_Linf",        95,  0.20,  -0.10,
+  "Higher_k",         110,  0.20,  -0.20,
+  "Adriatic_SS3",      88,  0.20,  -0.10
+)
+
+ages <- 0:6
+len_sd <- 2
+L_grid <- seq(5, 70, 0.5)
+
+dL_given_a <- function(L, age, Linf, k, t0, sigma = len_sd) {
+  mu <- vb_len(age, Linf, k, t0)
+  dnorm(L, mu, sigma)
+}
+```
+
+```{r}
+#| label: growth-sens-pal
+pal_grid <- growth_scenarios |>
+  tidyr::crossing(age = ages, L = L_grid) |>
+  rowwise() |>
+  mutate(density_L_given_a = dL_given_a(L, age, Linf, k, t0)) |>
+  ungroup() |>
+  group_by(scenario, L) |>
+  mutate(p_a_given_L = density_L_given_a / sum(density_L_given_a)) |>
+  ungroup()
+```
+
+Here the conditional probability of age given length for a discrete set of ages is
+
+$$
+P(a \mid L) = \frac{f(L \mid a)}{\sum_{a'} f(L \mid a')},
+$$
+
+where $f(L \mid a)$ is the normal density above. Changing $L_\infty$, $k$, or $t_0$ shifts the relative weight across ages for the same observed length.
+
+```{r}
+#| label: fig-growth-sens-pal
+#| fig-cap: "Conditional age probabilities P(a|L) across growth scenarios."
+ggplot(pal_grid, aes(L, factor(age), fill = p_a_given_L)) +
+  geom_tile() +
+  facet_wrap(~ scenario) +
+  scale_fill_viridis_c() +
+  labs(x="Length (cm)", y="Age", title="P(age|L)") +
+  theme_few()
+```
+
+Lower $L_\infty$ shifts probability mass to younger ages; a steeper $k$ compresses early growth and can move modal ages down for small fish but up for larger fish.
+
+```{r}
+#| label: growth-sens-pal-density
+len_pdf <- pal_grid |>
+  group_by(scenario, age) |>
+  mutate(p_L_given_a = density_L_given_a / sum(density_L_given_a)) |>
+  ungroup()
+```
+
+### Synthetic LFD and ΔCAA
+
+```{r}
+#| label: growth-sens-sim-lfd
+set.seed(123)
+true_age_probs <- c(0.30,0.30,0.20,0.10,0.06,0.03,0.01)
+names(true_age_probs) <- ages
+n_fish <- 5000
+true_ages <- sample(ages, n_fish, TRUE, true_age_probs)
+
+true_growth <- growth_scenarios |> filter(scenario=="Base_WestMed")
+
+sim_lengths <- tibble(age=true_ages) |>
+  mutate(L = vb_len(age, true_growth$Linf, true_growth$k, true_growth$t0) +
+           rnorm(n(), 0, len_sd))
+```
+
+```{r}
+#| label: growth-sens-lfd-bins
+lfd <- sim_lengths |>
+  mutate(L_bin = cut(L, breaks=seq(0,100,by=2), include.lowest=TRUE, right=FALSE)) |>
+  count(L_bin, name="n") |>
+  mutate(L_mid = seq(1, 99, by=2)[as.integer(L_bin)]) |>
+  filter(!is.na(L_mid))
+```
+
+```{r}
+#| label: growth-sens-pal-mat
+pal_mat <- pal_grid |>
+  mutate(age = as.integer(age)) |>
+  select(scenario, L, age, p_a_given_L)
+```
+
+```{r}
+#| label: growth-sens-slice
+slice_lfd <- function(scen) {
+  pal_scen <- pal_mat |> filter(scenario == scen)
+  L_bins <- lfd$L_mid
+  caa <- expand_grid(L_mid = L_bins, age = ages) |>
+    left_join(pal_scen, by = c("L_mid" = "L", "age" = "age")) |>
+    left_join(lfd, by = "L_mid") |>
+    mutate(prob = p_a_given_L, n = replace_na(n, 0)) |>
+    group_by(age) |>
+    summarise(CAA = sum(n * prob, na.rm = TRUE), .groups = "drop") |>
+    mutate(scenario = scen)
+  caa
+}
+
+caa_all <- purrr::map_dfr(growth_scenarios$scenario, slice_lfd)
+```
+
+```{r}
+#| label: growth-sens-delta-caa
+base_caa <- caa_all |> filter(scenario == "Base_WestMed") |> select(age, base_CAA = CAA)
+delta_caa <- caa_all |>
+  left_join(base_caa, by="age") |>
+  filter(scenario != "Base_WestMed") |>
+  mutate(delta = CAA - base_CAA)
+```
+
+```{r}
+#| label: fig-growth-sens-delta-caa
+#| fig-cap: "ΔCAA relative to Base_WestMed slicing."
+ggplot(delta_caa, aes(age, delta, color = scenario)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  labs(
+    x="Age",
+    y="ΔCAA (counts)",
+    title="Change in CAA when slicing under alternative growth"
+  ) +
+  theme_few()
+```
+
+Relative to Base_WestMed, shrinking $L_\infty$ moves fish from older to younger ages, increasing CAA for ages 0–2 and decreasing it for ages 4–6. Higher $k$ behaves similarly but with a milder gradient; the Adriatic-style curve has the strongest shift toward young ages.
+
+### Length-50 maturity comparison
+
+```{r}
+#| label: growth-sens-maturity
+years <- 1:20
+N_long <- tibble(age = ages, N = c(2000, 1800, 1400, 1000, 600, 200, 100))
+
+p_mat_age <- tibble(
+  age = ages,
+  p_mat = c(0.0, 0.2, 0.5, 0.7, 0.9, 0.95, 0.95)
+)
+
+L_grid_long <- seq(5, 120, by = 0.5)
+
+calc_pL_given_a <- function(growth_row) {
+  crossing(age = ages, L = L_grid_long) |>
+    rowwise() |>
+    mutate(density = dL_given_a(L, age, growth_row$Linf, growth_row$k, growth_row$t0)) |>
+    ungroup() |>
+    group_by(age) |>
+    mutate(p_L_given_a = density / sum(density)) |>
+    ungroup()
+}
+
+len_probs_base <- calc_pL_given_a(growth_scenarios |> filter(scenario == "Base_WestMed"))
+len_probs_adr <- calc_pL_given_a(growth_scenarios |> filter(scenario == "Adriatic_SS3"))
+
+calc_L50_scen <- function(probs_mat) {
+  function(y) {
+    N_y <- N_long
+    df <- probs_mat |>
+      left_join(N_y, by="age") |>
+      left_join(p_mat_age, by="age")
+
+    total_L <- df |>
+      group_by(L) |>
+      summarise(total = sum(N * p_L_given_a, na.rm=TRUE),
+                mature = sum(N * p_L_given_a * p_mat, na.rm=TRUE),
+                .groups="drop")
+    if (all(total_L$total == 0)) return(NA_real_)
+    prop <- total_L$mature / total_L$total
+    idx <- which(prop >= 0.5)[1]
+    if (is.na(idx)) return(NA_real_)
+    if (idx == 1) return(total_L$L[1])
+    L1 <- total_L$L[idx-1]; L2 <- total_L$L[idx]
+    p1 <- prop[idx-1]; p2 <- prop[idx]
+    L1 + (0.5 - p1) * (L2 - L1) / (p2 - p1)
+  }
+}
+
+L50_base <- tibble(
+  scenario="Base_WestMed",
+  year = years,
+  L50_length = purrr::map_dbl(years, calc_L50_scen(len_probs_base))
+) |> filter(year>5)
+
+L50_adr <- tibble(
+  scenario="Adriatic_SS3",
+  year = years,
+  L50_length = purrr::map_dbl(years, calc_L50_scen(len_probs_adr))
+) |> filter(year>5)
+
+L50_both <- bind_rows(L50_base, L50_adr)
+```
+
+```{r}
+#| label: fig-growth-sens-L50
+#| fig-cap: "Implied L50 over time comparing Base_WestMed and Adriatic_SS3 (age-50=2)."
+ggplot(L50_both, aes(year, L50_length, color=scenario)) +
+  geom_line() +
+  geom_point() +
+  labs(x="Year", y="Implied L50 (cm)", title="Length at 50% maturity (age-50=2) by growth option") +
+  theme_few()
+```
+
+The Adriatic_SS3 option yields consistently lower implied length-50 because its growth curve keeps lengths smaller at a given age. Interannual variability remains driven by recruitment swings, but the baseline level is pulled down relative to the West Med curve.
+
+## Implications for Assessment and Benchmarking
+
+### Sex-specific slicing
+
+Both WGHKE and STECF recommend:
+
+- Implementing sex-specific slicing for catch and survey length distributions whenever sexed data are available, even if only for a subset of years.
+- Using sex-specific maturity and natural mortality vectors to maintain internal coherence with the growth functions @WGHKE2025; @STECF2506.
+- Building on ICATMAR’s sex-specific LF and L50 series in northern GSA 6 to prototype sex-structured slicing and compare against the current sex-combined approach.
+
+### Revising growth for GSAs 1–5–6–7
+
+Main concerns for the current West-Med combined assessment:
+
+- Tag-based $L_\infty$ (≈ 110 cm) likely overestimates the mean asymptotic length, particularly if based on older, larger individuals and high-variance increments @MellonDuval2010; @WGHKE2025.
+- This can inflate unfished biomass (B₀) and skew depletion-based status metrics.
+- It may propagate into derived quantities such as weight-at-age (via slicing) and reference points.
+
+Short-term guidance (until the benchmark):
+
+- Retain the current curve (Mellon-Duval / ICATMAR-centered VBGF) for continuity, but treat it as a working assumption, not a fixed truth.
+- Conduct sensitivity runs with lower $L_\infty$ informed by adjacent stocks (e.g. borrowing from GSA 8–11 or Central Med), or by internal growth estimation using ALKs in integrated models.
+
+### Integrated models and bi-phasic growth
+
+Integrated Stock Synthesis models have:
+
+- Demonstrated better fits in data-rich areas when growth is estimated inside the model from ALKs and length data @Carbonara2023; @STECF2506.
+- Supported bi-phasic (Schnute–Richards) growth in the Adriatic and Central Med, where early-life growth is faster than a single VBGF would suggest.
+
+For the Western Med benchmark, candidate approaches include:
+
+- A sex-structured Stock Synthesis configuration using multiple fleets (OTB, gillnets, longlines), MEDITS/BALAR as primary survey indices, and historical ALKs for at least a subset of years.
+- A simpler a4a configuration with sex-specific growth and maturity by GSA (or substocks), a revised natural mortality vector (e.g. Chen–Watanabe) @ChenWatanabe1989; @STECF2506, and a multi-fleet or tensor-based F submodel to approximate changing selectivity.
+
+### Practical benchmark messages
+
+For the benchmark terms of reference, you can boil the growth story down to:
+
+- We accept that growth differs among GSAs, with the Western Med having the largest historical $L_\infty$ but likely overestimated.
+- We will not treat GSAs 1–5–6–7 as a closed, homogeneous stock without exploring alternatives supported by MED_UNITs, TRANSBORAN, and local monitoring (e.g. ICATMAR).
+- We will prioritize candidate models that:
+  - Are sex-structured,
+  - Allow multi-fleet selectivity,
+  - Use growth in a way that is coherent with ALKs and observed length structure, and
+  - Are robust to mis-specified growth via sensitivity testing.
+
+# STECF 25-06 Scenarios and Their Implications
+
+The STECF EWG 25-06 explored a structured set of assessment scenarios to evaluate
+how updated data inputs, revised survey indices, modified natural mortality vectors,
+and alternative fishing mortality sub-models influence the combined hake assessment for
+GSAs 1–5–6–7. The scenarios represent incremental steps away from the current
+configuration toward future benchmark-ready approaches @STECF2506.
+
+### Scenario 2.2 — 2025 Base Case with Updated Data and MEDITS-2020 Set to NA
+
+Scenario 2.2 represents the “clean” update of the existing a4a model:
+
+- Uses all revised input data through **2024**, including corrected MEDITS series.
+- Replaces the 2020 MEDITS index with **NA**, allowing the model to estimate that
+value indirectly rather than rely on a reconstructed series.
+- Maintains the **current f-model**, **current natural mortality vector**, and **current
+growth assumptions**.
+
+Key outcomes:
+
+- Overall dynamics remain consistent with the 2024 assessment.
+- A mild decline in fishing mortality since 2020 appears, not visible in earlier
+assessments.
+- Retrospective patterns improve slightly when 2020 is set to NA.
+- Provides the most internally consistent “status quo” configuration for continuity.
+
+### Scenario 3.2 — Tensor-Based Fishing Mortality with BALAR + MEDITS (2002–2024)
+
+Scenario 3.2 extends the time series and explicitly introduces a more flexible fishing mortality
+structure:
+
+- Merges MEDITS with **BALAR (2002–2006)** to extend the GSA 5 series backward.
+- Expands the assessment window to **2002–2024**.
+- Introduces a **tensor smooth (te(age,year))** in the F-submodel to capture
+time-varying selectivity due to:
+  - gear changes,
+  - loss of longliners,
+  - adoption of square-mesh codends,
+  - effort reduction under EUMAP.
+
+Key outcomes:
+
+- Identifies temporal shifts in selectivity affecting age-0 and older age groups.
+- Produces fits similar in quality to the base case but more biologically coherent
+with observed fleet dynamics.
+- Recovers slightly different recruitment and SSB trajectories in the early period.
+
+Scenario 3.2 is the closest to a benchmark-capable a4a model.
+
+### Scenario 3.4 — Tensor F-Model + Chen–Watanabe Natural Mortality
+
+Scenario 3.4 combines:
+
+- the extended BALAR+MEDITS index (2002–2024),
+- the **tensor product** fishing mortality smoother,
+- and the **Chen–Watanabe (1989)** natural mortality vector selected by STECF
+for its robustness to model mis-specification @ChenWatanabe1989; @STECF2506.
+
+Key outcomes:
+
+- Recruitment levels are lower (due to reduced M at age-0).
+- SSB trends remain directionally similar but shift upward or downward depending
+on age structure of the slice.
+- F-bar levels slightly lower in the terminal years relative to the current M vector.
+- Retrospective patterns for F improve in magnitude but remain present.
+
+Scenario 3.4 is identified in STECF 25-06 as a strong candidate for future work because
+it aligns updated data inputs, improved F-structure, and a quantitatively defended
+natural mortality model.
+
+## Candidate Models to be Explored (Reviewer’s Recommendations)
+
+Based on the STECF 25-06 analyses and the requirements of the upcoming
+benchmark process, the following candidate models are proposed for exploration
+in order of increasing complexity.
+
+### (A) Enhanced a4a Configuration (Benchmark-Light)
+
+A direct extension of Scenario 3.4 with:
+
+- Sex-specific slicing (if operational by data-prep time),
+- Chen–Watanabe M vector,
+- Tensor-based fishing mortality,
+- BALAR-extended MEDITS series (2002–2024),
+- Sensitivity runs with updated growth curves (lower $L_\infty$).
+
+Purpose:  
+Provide a “drop-in” improved a4a model that is transparent, reproducible, and suitable
+for rapid yearly advice even after the benchmark.
+
+### (B) A4A With Sex-Structured Catch and Survey
+
+This intermediate configuration would:
+
+- Use sex-specific VBGF parameters (Mellon-Duval 2010 or updated alternatives),
+- Recalculate catch-at-age by sex,
+- Apply sex-specific maturity and natural mortality vectors,
+- Retain a4a’s simpler statistical structure.
+
+Purpose:  
+Quantify how much of current model behaviour is driven by sex mixing and whether
+internal consistency improves.
+
+### (C) Stock Synthesis (SS3) Sex-Structured, Multi-Fleet Model
+
+A benchmark-grade model enabling:
+
+- Full sex structure,
+- Multi-fleet selectivity (trawl, gillnet, longline, OTT),
+- Time-varying selectivity (smooth or block-based),
+- Internal estimation of growth using ALKs where available,
+- Integrated handling of survey and composition data.
+
+Purpose:  
+Serve as a “high-resolution” candidate model to evaluate structural uncertainty and
+provide diagnostics not possible in a4a (e.g. growth bias tests, conditional age-at-length).
+
+### (D) Bi-phasic Growth Extension (Schnute–Richards)
+
+For Central/Adriatic GSAs this is already used.  
+For West Med it would be exploratory only.
+
+Purpose:  
+Test whether early-life growth is mis-specified under a single VBGF,
+and whether this affects slicing, recruitment patterns, or the relative contribution
+of age-0/age-1 fish to the population.
+
+### (E) SPiCT as a Cross-Check (Not for Advice)
+
+Only useful when:
+
+- using longline/gillnet LPUE as auxiliary adult biomass signals, or
+- conducting cross-model consistency checks.
+
+Purpose:  
+Aid exploration of adult trends independently from the MEDITS-dominated index.
+
+## Summary of Model Path
+
+The STECF 25-06 scenarios establish a clear path:
+
+- Scenario 2.2 provides the stable “continuity” model.  
+- Scenario 3.2 provides improved selectivity realism.  
+- Scenario 3.4 provides the most defensible biological configuration (new M, tensor F).
+
+The recommended candidate models build directly on this sequence, extending it into
+sex-structure, integrated growth, and multi-fleet selectivity as needed for the benchmark.
+
+# Bycatch and Species Composition 
+
+European hake represents a relatively small share of the Balearic trawl fishery. Across
+all years examined, hake accounts for only **4–7%** of the total commercial biomass in
+GSA 5 (STECF 25-06), confirming the multispecific character of the fishery @STECF2506.
+The updated stock-boundary analysis for the Balearic Islands provides a detailed view of
+the species mix and ecosystem context driving these patterns @Quetglas2012.
+
+## Species Composition of Commercial Landings (GSA 5)
+
+The figure *“Landings target species (%)”* in the Balearic analysis shows that the GSA 5
+trawl fishery is dominated by a small number of crustacean species, with fish species
+including hake forming a secondary component.
+
+```{r}
+#| label: tbl-gsa5-species-composition
+#| echo: false
+#| message: false
+#| warning: false
+
+species <- data.frame(
+  Species = c(
+    "Aristeus antennatus (red shrimp)",
+    "Parapenaeus longirostris (rose shrimp)",
+    "Mullus spp. (red mullets)",
+    "Merluccius merluccius (hake)",
+    "Nephrops norvegicus"
+  ),
+  `Approx. Biomass Share (%)` = c(36, 14, 12, 4, 11),
+  `Approx. Value Share (%)`  = c(40, 15, 10, 6, 12),
+  `Notes` = c(
+    "Deep-water shrimp; major target in GSA 5",
+    "Upper-slope crustacean; important component",
+    "Shelf-associated; habitat-dependent variability",
+    "Minor share of landings; biological importance",
+    "Variable across slope and shelf"
+  )
+)
+
+knitr::kable(
+  species,
+  caption = "Approximate species composition of GSA 5 landings (biomass and value) based on the Quetglas et al. (2012) update @Quetglas2012.",
+  booktabs = TRUE
+)
+```
+
+Values represent approximate proportions inferred visually from the biomass and value
+barplots on the GSA 5 panel.
+
+## GSA 1–GSA 6 Comparison of Target Species (Biomass and Value)
+
+Using the same *“Landings target species (%)”* slide, we can summarize the relative
+importance of the main target species in GSAs 1, 5 and 6 qualitatively in terms of biomass
+and value.
+
+```{r}
+#| label: tbl-gsa1-5-6-target-species
+#| echo: false
+#| message: false
+#| warning: false
+
+comp <- data.frame(
+  GSA = c("1", "1", "1", "5", "5", "5", "6", "6", "6"),
+  Species = c(
+    "Aristeus antennatus",
+    "Merluccius merluccius",
+    "Mullus spp.",
+    "Aristeus antennatus",
+    "Merluccius merluccius",
+    "Mullus spp.",
+    "Aristeus antennatus",
+    "Merluccius merluccius",
+    "Mullus spp."
+  ),
+  `Biomass Importance` = c(
+    "High",    # GSA1 ARA
+    "Low",     # GSA1 HKE
+    "Medium",  # GSA1 MUX
+    "High",    # GSA5 ARA
+    "Low",     # GSA5 HKE
+    "Medium",  # GSA5 MUX
+    "Medium",  # GSA6 ARA
+    "Medium",  # GSA6 HKE
+    "Medium"   # GSA6 MUX
+  ),
+  `Value Importance` = c(
+    "High",
+    "Low–Medium",
+    "Medium",
+    "High",
+    "Medium",
+    "Medium",
+    "High",
+    "Medium",
+    "Medium"
+  )
+)
+
+knitr::kable(
+  comp,
+  caption = "Qualitative comparison of target species importance in GSAs 1, 5 and 6 in terms of biomass and value (derived from Quetglas et al. 2012 updated figures).",
+  booktabs = TRUE
+)
+```
+
+This emphasizes that:
+
+- GSAs 1 and 5 are strongly dominated in biomass and value by *Aristeus antennatus*
+  and other crustaceans.
+- GSA 6 has a more balanced mix of crustaceans and fish (including hake and red mullet),
+  with higher relative importance of hake than in GSA 5.
+
+## Discards and Bycatch Characteristics
+
+The structure and ecological setting of the Balearic shelf results in exceptionally high
+discard fractions compared to mainland GSAs:
+
+- **55–70%** of total catch on the shallow shelf consists of **algae, echinoderms and non-commercial invertebrates**, rather than small fish.
+- Mainland areas (e.g., GSA 6) show **much lower discard fractions** (23–48%) with fish dominating the discard stream.
+- This reflects strong differences in bottom type, productivity, and community structure @Quetglas2012.
+
+```{r}
+#| label: tbl-gsa5-discard
+#| echo: false
+#| message: false
+#| warning: false
+
+discard <- data.frame(
+  Category = c("Shallow-shelf discards", "Deep-slope discards", "Dominant discard groups"),
+  `GSA 5` = c("55–70%", "~20–30%", "Algae, echinoderms, sessile invertebrates"),
+  `GSA 6` = c("23–48%", "~20–35%", "Small fish, benthic fish, invertebrates")
+)
+
+knitr::kable(
+  discard,
+  caption = "Comparison of discard characteristics between GSA 5 and GSA 6 (page 6 of Quetglas et al. 2012 update).",
+  booktabs = TRUE
+)
+```
+
+## Elasmobranch Bycatch and Diversity
+
+The Balearic Islands display some of the highest elasmobranch species richness in the
+entire Western Mediterranean:
+
+- **18×** more abundant,
+- **19×** higher biomass, and
+- **7×** higher species richness than GSA 6 on the 50–100 m shelf @Quetglas2012.
+
+This makes elasmobranchs (particularly *Scyliorhinus canicula*, *Etmopterus spinax*,
+*Galeus melastomus*) a consistently large bycatch group in GSA 5.
+
+## Habitat-Driven Differences in Assemblages
+
+Habitat contrasts between the Balearic Islands and mainland Spain drive sharp differences
+in species caught:
+
+- Red algae beds (maërl & *Peyssonellia* beds) exist deeper in GSA 5, allowing trawling to operate on habitats that do not occur at equivalent depths in GSA 6.
+- *Mullus barbatus* dominates soft-bottom shelf catches in GSA 5, whereas *Mullus surmuletus* is more abundant in GSA 6.
+- As the Balearic shelf is disconnected from the mainland by 800–2000 m depths, slope communities differ strongly and contribute to distinct mixed-catch assemblages.
+
+## Visual Summary
+
+```{r}
+#| label: fig-gsa5-bycatch-summary
+#| fig-cap: "Schematic summary of main species groups contributing to GSA 5 mixed catches."
+#| echo: false
+#| warning: false
+#| message: false
+
+df <- data.frame(
+  Group = c("Red shrimp", "Rose shrimp", "Red mullets", "Hake", "Norway lobster", "Elasmobranchs", "Non-commercial discards"),
+  Share = c(36, 14, 12, 4, 11, 8, 15)
+)
+
+ggplot(df, aes(x = reorder(Group, Share), y = Share)) +
+  geom_col(fill = "#2E86AB") +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    x = "",
+    y = "Relative Share (approx. %)",
+    title = "Approximate Contribution of Major Species / Groups in GSA 5 Catches"
+  )
+```
+
+### Summary
+
+The Balearic Islands demersal fishery differs substantially from adjacent mainland GSAs.
+Although hake is biologically important, it makes up a minor fraction of landings.
+Bycatch consists primarily of crustaceans, elasmobranchs, red mullets, and high discard
+volumes dominated by non-commercial invertebrates. These patterns underscore the need
+to treat GSA 5 as a distinctive ecological and fishery unit when interpreting mixed-fleet
+data for the hake assessment.
+
+# MEDITs exploratory plots (HKE)
+
+This section folds in the exploratory notebook for MEDITs haul, species-total, and length data for hake (files a, b, c). The scripts were drafted from informal queries and should be reviewed before reuse, but having them here keeps the survey diagnostics with the growth material.
+
+## Data setup
+
+```{r}
+#| label: medits-data
+ta <- qread("TA_HKE.qs") |> filter(area != 2)
+tb <- qread("TB_HKE.qs") |> filter(area != 2, genus=="MERL")
+tc <- qread("TC_HKE.qs") |> filter(area != 2, genus=="MERL")
+```
+
+## How the tables relate
+
+- `ta`: haul-level metadata (area, vessel, gear, positions, depth, duration, validity).
+- `tb`: haul-level species totals (genus/species codes, numbers by sex categories).
+- `tc`: length-frequency for species within hauls (length classes, counts).
+
+Common keys to link: `country`, `area`, `vessel`, `year`, `month`, `day`, `haul_number`, `codend_closing`, `partit`.
+
+## Merluccius extraction
+
+Filter for hake (`genus == "MERL"` and `species == "MEL"`) and join lengths to hauls to get year and haul context.
+
+```{r}
+#| label: medits-merluccius-join
+# Standard key for joins
+join_keys <- c("country","area","vessel","year","month","day","haul_number","codend_closing","partit")
+
+# Merluccius in species totals (tb)
+hake_tb <- tb |>
+  filter(genus == "MERL", species %in% c("MEL", "MER"))
+
+# Merluccius in length data (tc)
+hake_tc <- tc |>
+  filter(genus == "MERL", species %in% c("MEL", "MER"))
+
+# helper: convert ddmm.mm format to decimal degrees
+dms_to_dd <- function(x) {
+  deg <- floor(x / 100)
+  min <- x - deg * 100
+  deg + min / 60
+}
+
+# Join lengths to haul-year info via ta (carry distance and wing_opening for swept area)
+hake_len <- hake_tc |>
+  inner_join(
+    ta |> select(any_of(c(join_keys, "distance", "wing_opening",
+                          "shooting_latitude", "shooting_longitude", "shooting_quadrant"))),
+    by = join_keys
+  )
+
+glimpse(hake_len)
+```
+
+## Approximate densities (numbers per km²)
+
+Compute station-level swept area as `distance * wing_opening` (m², converted to km²) and total hake numbers per station. Plot the distribution of numbers per km² by year and area.
+
+```{r}
+#| label: medits-dens-facet-year-area
+#| fig-height: 12
+#| fig-width: 6
+station_density <- hake_len |>
+  group_by(country, area, vessel, year, month, day, haul_number, codend_closing, partit,
+           distance, wing_opening, shooting_latitude, shooting_longitude, shooting_quadrant) |>
+  summarise(n_total = sum(nblon, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    swept_area_km2 = (distance * wing_opening) / 1e6,
+    density_n_km2 = n_total / swept_area_km2
+  )
+
+station_density |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  mutate(
+    area = factor(area),
+    period = paste0(floor((year - min(year, na.rm = TRUE)) / 5) * 5 +
+                      min(year, na.rm = TRUE), "–",
+                    floor((year - min(year, na.rm = TRUE)) / 5) * 5 +
+                      min(year, na.rm = TRUE) + 4)
+  ) |>
+  ggplot(aes(density_n_km2)) +
+  geom_histogram(fill = "steelblue", alpha = 0.7, boundary = 0) +
+  scale_x_log10() +
+  facet_grid(period ~ area, scales = "free_y") +
+  labs(
+    x = "Estimated density (numbers / km^2, log scale)",
+    y = "Count of stations",
+    title = "Station-level Merluccius density proxy by 5-year period and area"
+  ) +
+  ggthemes::theme_few() +
+  theme(panel.border = element_blank())
+```
+
+The faceted density plot caps densities at 500 fish/km² and shows haul-level distributions by year (rows) and area (columns); capping plus binning keeps long tails readable.
+
+```{r}
+#| label: medits-dens-all-years
+station_density |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  mutate(area = factor(area),
+         dens_cap = pmin(density_n_km2, 500)) |>
+  ggplot(aes(dens_cap)) +
+  geom_histogram(binwidth = 25, fill = "darkorange", alpha = 0.7, boundary = 0) +
+  facet_wrap(~ area, scales = "free_y") +
+  labs(
+    x = "Estimated density (numbers / km^2)",
+    y = "Count of stations",
+    title = "Station-level Merluccius density proxy by area (all years)"
+  ) +
+  ggthemes::theme_few()
+```
+
+This collapses all years, still capping at 500, to compare overall density shapes by area.
+
+```{r}
+#| label: medits-dens-boxplot
+#| fig-width: 8
+#| fig-height: 5
+station_density |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  mutate(year = factor(year), area = factor(area)) |>
+  ggplot(aes(year, density_n_km2, fill = area, color = area)) +
+  geom_boxplot(outlier.alpha = 0.4) +
+  scale_y_log10(limits = c(NA, 750)) +
+  labs(
+    x = "Year",
+    y = "Estimated density (numbers / km^2)",
+    title = "Station-level density boxplots by year and area",
+    fill = "Area",
+    color = "Area"
+  ) +
+  ggthemes::theme_few()
+```
+
+Boxplots summarise the log-scaled station densities by year and area, highlighting medians and spread.
+
+```{r}
+#| label: medits-dens-median
+station_density |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  group_by(area, year) |>
+  summarise(med_density = median(density_n_km2), .groups = "drop") |>
+  mutate(year = as.numeric(year)) |>
+  ggplot(aes(year, med_density, color = factor(area))) +
+  geom_point() +
+  geom_smooth(se = TRUE, method = "loess", span = 0.6, alpha=.05) +
+  scale_y_log10(limits = c(NA, 750)) +
+  labs(
+    x = "Year",
+    y = "Median density (numbers / km^2, log scale)",
+    title = "Median station-level density over time by area",
+    color = "Area"
+  ) +
+  ggthemes::theme_few()
+```
+
+Densities also vary spatially. The next heatmaps show where hauls were densest, first pooling all years, then grouping by decade to highlight shifts in hotspots.
+
+```{r}
+#| label: medits-dens-heatmap-year
+#| fig-cap: "Mean log10 density (numbers per km^2) across all years, displayed on a 2D grid with coastline and land overlays."
+if (!requireNamespace("maps", quietly = TRUE)) {
+  stop("Package 'maps' is required for coastline/land layer")
+}
+
+dens_map <- station_density |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  mutate(
+    lat_dd = dms_to_dd(shooting_latitude),
+    lon_dd = dms_to_dd(shooting_longitude) *
+      ifelse(shooting_quadrant %in% c(7, "7"), -1, 1),
+    log_density = log10(density_n_km2)
+  ) |>
+  filter(is.finite(lat_dd), is.finite(lon_dd), is.finite(log_density))
+
+world <- ggplot2::map_data("world") |>
+  filter(
+    long > min(dens_map$lon_dd, na.rm = TRUE) - 1,
+    long < max(dens_map$lon_dd, na.rm = TRUE) + 1,
+    lat  > min(dens_map$lat_dd, na.rm = TRUE) - 1,
+    lat  < max(dens_map$lat_dd, na.rm = TRUE) + 1
+  )
+
+ggplot() +
+  geom_polygon(data = world, aes(long, lat, group = group),
+               fill = "grey90", color = "grey70", linewidth = 0.2) +
+  stat_summary_2d(data = dens_map, aes(lon_dd, lat_dd, z = log_density),
+                  fun = mean, bins = 35) +
+  scale_fill_viridis_c(name = "Mean log10 density\n(numbers / km^2)") +
+  coord_quickmap() +
+  labs(
+    x = "Longitude",
+    y = "Latitude",
+    title = "Spatial heatmap of log-density (all years combined)"
+  ) +
+  ggthemes::theme_few()
+```
+
+```{r}
+#| label: medits-dens-heatmap-decade
+#| fig-cap: "Mean log10 density by decade, showing how hotspots shift over time."
+dens_map_decade <- station_density |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  mutate(
+    lat_dd = dms_to_dd(shooting_latitude),
+    lon_dd = dms_to_dd(shooting_longitude) *
+      ifelse(shooting_quadrant %in% c(7, "7"), -1, 1),
+    log_density = log10(density_n_km2),
+    decade = paste0((year %/% 10) * 10, "s")
+  ) |>
+  filter(is.finite(lat_dd), is.finite(lon_dd), is.finite(log_density))
+
+ggplot() +
+  geom_polygon(data = world, aes(long, lat, group = group),
+               fill = "grey90", color = "grey70", linewidth = 0.2) +
+  stat_summary_2d(data = dens_map_decade,
+                  aes(lon_dd, lat_dd, z = log_density),
+                  fun = mean, bins = 35) +
+  scale_fill_viridis_c(name = "Mean log10 density\n(numbers / km^2)") +
+  coord_quickmap() +
+  facet_wrap(~ decade) +
+  labs(
+    x = "Longitude",
+    y = "Latitude",
+    title = "Spatial heatmap of log-density by decade"
+  ) +
+  ggthemes::theme_few()
+```
+
+Parallel plots below translate density weighting into expected length: darker cells indicate areas where hauls contained longer fish on average.
+
+```{r}
+#| label: medits-length-heatmap
+#| fig-cap: "Density-weighted mean length (cm) across all years, mapped spatially with coastline and land overlays."
+length_map <- hake_len |>
+  left_join(
+    station_density |>
+      select(all_of(join_keys), density_n_km2),
+    by = join_keys
+  ) |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  mutate(
+    length_cm = length_class / 10,
+    lon_dd = dms_to_dd(shooting_longitude) *
+      ifelse(shooting_quadrant %in% c(7, "7"), -1, 1),
+    lat_dd = dms_to_dd(shooting_latitude)
+  ) |>
+  group_by(country, area, vessel, year, month, day, haul_number, codend_closing, partit,
+           lon_dd, lat_dd) |>
+  summarise(
+    mean_length_cm = sum(length_cm * nblon * density_n_km2, na.rm = TRUE) /
+      sum(nblon * density_n_km2, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  filter(is.finite(mean_length_cm), is.finite(lon_dd), is.finite(lat_dd))
+
+ggplot() +
+  geom_polygon(data = world, aes(long, lat, group = group),
+               fill = "grey90", color = "grey70", linewidth = 0.2) +
+  stat_summary_2d(data = length_map,
+                  aes(lon_dd, lat_dd, z = mean_length_cm),
+                  fun = mean, bins = 35) +
+  scale_fill_viridis_c(name = "Mean density-weighted length (cm)") +
+  coord_quickmap() +
+  labs(
+    x = "Longitude",
+    y = "Latitude",
+    title = "Spatial heatmap of density-weighted mean length (all years combined)"
+  ) +
+  ggthemes::theme_few()
+```
+
+```{r}
+#| label: medits-length-heatmap-decade
+#| fig-cap: "Density-weighted mean length by decade (values above 45 cm omitted), revealing spatial shifts in larger fish over time."
+length_map_decade <- length_map |>
+  filter(mean_length_cm <= 45) |>
+  mutate(decade = paste0((year %/% 10) * 10, "s"))
+
+ggplot() +
+  geom_polygon(data = world, aes(long, lat, group = group),
+               fill = "grey90", color = "grey70", linewidth = 0.2) +
+  stat_summary_2d(data = length_map_decade,
+                  aes(lon_dd, lat_dd, z = mean_length_cm),
+                  fun = mean, bins = 35) +
+  scale_fill_viridis_c(name = "Mean density-weighted length (cm)") +
+  coord_quickmap() +
+  facet_wrap(~ decade) +
+  labs(
+    x = "Longitude",
+    y = "Latitude",
+    title = "Spatial heatmap of density-weighted mean length by decade"
+  ) +
+  ggthemes::theme_few()
+```
+
+## Length-class histograms by year
+
+Length distributions help flag shifts toward smaller or larger fish over time. The ridge plot below overlays yearly curves (weighted by counts) to show whether lengths compress or stretch.
+
+```{r}
+#| label: medits-lf-year
+#| fig-height: 10 
+#| fig-width: 5
+#| fig-cap: "Length-class density ridges by year and area; taller peaks imply more fish at that size class."
+hake_len |> filter(length_class<610) |> 
+  mutate(
+    year = factor(year),
+    length_class_collapsed = pmin(length_class, 400)
+  ) |>
+  ggplot(aes(x = length_class_collapsed/10, y = year, weight = nblon, fill = year)) +
+  geom_density_ridges(scale = 2.0, alpha = 0.7, color = "grey30") +
+  scale_fill_viridis_d(option = "C") +
+  labs(
+    x = "Length class",
+    y = "Year",
+    title = "Merluccius length-class distributions by year and area "
+  ) +
+  theme_minimal() + facet_wrap(~area) +
+  theme(legend.position = "none")
+```
+
+Quarterly density-weighted histograms expose seasonal structure in lengths within each area.
+
+```{r}
+#| label: medits-lf-density-quarter
+#| fig-cap: "Density-weighted length frequencies by quarter and area; bars reflect counts weighted by station density."
+hake_len |>
+  left_join(station_density |> select(all_of(join_keys), density_n_km2), by = join_keys) |>
+  filter(is.finite(density_n_km2)) |>
+  mutate(
+    quarter = paste0("Q", ceiling(month / 3)),
+    area = factor(area)
+  ) |>
+  group_by(area, quarter, length_class) |>
+  summarise(weighted_n = sum(nblon * density_n_km2, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(length_class, weighted_n)) +
+  geom_col(fill = "darkolivegreen3", alpha = 0.8) +
+  facet_grid(area ~ quarter, scales = "free_y") +
+  labs(
+    x = "Length class",
+    y = "Density-weighted count",
+    title = "Density-weighted length frequencies by area and quarter (all years)"
+  ) +
+  ggthemes::theme_few()
+```
+
+The map below tracks how density-weighted mean haul locations move through time, giving a quick visual on survey footprint.
+
+```{r}
+#| label: medits-map-density
+#| fig-width: 17
+#| fig-height: 16
+#| fig-cap: "Density-weighted mean haul locations by year and area; labels show the year."
+convert_ddmm <- function(x) {
+  deg <- floor(x / 100)
+  min <- x - deg * 100
+  deg + min / 60
+}
+
+loc_weighted <- station_density |>
+  filter(is.finite(density_n_km2), density_n_km2 > 0) |>
+  mutate(
+    lat_dd = convert_ddmm(shooting_latitude),
+    lon_dd = convert_ddmm(shooting_longitude),
+    lon_dd = ifelse(shooting_quadrant == 7, -abs(lon_dd), abs(lon_dd))
+  ) |>
+  group_by(area, year) |>
+  summarise(
+    wlat = weighted.mean(lat_dd, density_n_km2, na.rm = TRUE),
+    wlon = weighted.mean(lon_dd, density_n_km2, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+world <- ggplot2::map_data("world")
+
+ggplot() +
+  geom_polygon(data = world, aes(long, lat, group = group), fill = "grey90", color = "white") +
+  geom_text(data = loc_weighted, aes(wlon, wlat, label = substr(year, 3, 4), color = factor(area)), nudge_y = 0.0, size = 7) +
+  geom_path(data = loc_weighted, aes(wlon, wlat, label = year, color = factor(area)), nudge_y = 0.0, size = .2) +
+  coord_quickmap(xlim = range(loc_weighted$wlon, na.rm = TRUE) + c(-1, 1),
+                 ylim = range(loc_weighted$wlat, na.rm = TRUE) + c(-1, 1)) +
+  labs(
+    x = "Longitude",
+    y = "Latitude",
+    color = "Area",
+    title = "Density-weighted mean haul locations by year and area"
+  ) +
+  ggthemes::theme_few(base_size=14)
+```
+
+## Notes on data structure
+
+- `tb` provides totals by haul; `tc` provides the detailed length composition. The joins above focus on `tc` to visualize distributions.
+- If multiple vessels/areas are present, further filters (e.g., by `area` or `vessel`) can be added before plotting.
+
+## Maturity data
+
+Please note this code needs checking.
+
+```{r}
+#| label: medits-maturity-length
+#| fig-cap: "Length frequencies for females by maturity status and area; immature vs mature split highlights maturation range."
+maturity_len <- hake_len |>
+  filter(sex == "F") |>
+  mutate(status = ifelse(maturity != 1, "Mature", "Immature")) |>
+  filter(!is.na(status))
+
+maturity_len |>
+  mutate(area = factor(area)) |>
+  ggplot(aes(length_class, nblon, fill = status)) +
+  geom_col(position = "identity", alpha = 0.7) +
+  facet_grid(area ~ ., scales = "free") +
+  labs(
+    x = "Length class",
+    y = "Count",
+    fill = "Status",
+    title = "Female Merluccius length frequencies by maturity status and area"
+  ) +
+  ggthemes::theme_few()
+```
+
+Below we track sample sizes and sex composition to gauge representativeness for length–weight work.
+
+```{r}
+#| label: medits-n-length-records-by-year
+#| fig-cap: "Counts of length measurements by area and year; higher values mean better support for length–weight estimation."
+hake_len |>
+  group_by(area, year) |>
+  summarise(n_length_records = sum(nblon, na.rm = TRUE), .groups = "drop") |>
+  mutate(area = factor(area)) |>
+  ggplot(aes(year, n_length_records, color = area, group = area)) +
+  geom_line() +
+  geom_point(size = 2) +
+  expand_limits(y = 0) +
+  labs(
+    x = "Year",
+    y = "Number of length records (nblon)",
+    color = "Area",
+    title = "Count of length measurements by year and area (proxy for length–weight data availability)"
+  ) +
+  ggthemes::theme_few()
+```
+
+```{r}
+#| label: medits-sex-ratio-all-years
+#| fig-cap: "Sex ratios of length records by area (all years combined)."
+hake_len |>
+  filter(!is.na(sex)) |>
+  mutate(area = factor(area), sex = factor(sex)) |>
+  group_by(area, sex) |>
+  summarise(n_length_records = sum(nblon, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(area, n_length_records, fill = sex)) +
+  geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    x = "Area",
+    y = "Sex ratio (share of length records)",
+    fill = "Sex",
+    title = "Sex ratio of length records by area (all years)"
+  ) +
+  ggthemes::theme_few()
+```
+
+```{r}
+#| label: medits-sex-ratio-all-years-abs
+#| fig-cap: "Absolute counts of length records by sex and area (all years)."
+hake_len |>
+  filter(!is.na(sex)) |>
+  mutate(area = factor(area), sex = factor(sex)) |>
+  group_by(area, sex) |>
+  summarise(n_length_records = sum(nblon, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(area, n_length_records, fill = sex)) +
+  geom_col(position = "stack") +
+  labs(
+    x = "Area",
+    y = "Number of length records",
+    fill = "Sex",
+    title = "Counts of length records by sex and area (all years)"
+  ) +
+  ggthemes::theme_few()
+```
+
+```{r}
+#| label: medits-sex-ratio-by-year
+#| fig-cap: "Sex ratios through time by area; stacked shares show changing composition."
+hake_len |>
+  filter(!is.na(sex)) |>
+  mutate(area = factor(area), sex = factor(sex)) |>
+  group_by(area, year, sex) |>
+  summarise(n_length_records = sum(nblon, na.rm = TRUE), .groups = "drop") |>
+  group_by(area, year) |>
+  mutate(total = sum(n_length_records)) |>
+  ungroup() |>
+  ggplot(aes(year, n_length_records / total, fill = sex)) +
+  geom_col(position = "stack") +
+  facet_wrap(~ area, nrow = 1) +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+  labs(
+    x = "Year",
+    y = "Sex ratio (share of length records)",
+    fill = "Sex",
+    title = "Sex ratio of length records by year and area"
+  ) +
+  ggthemes::theme_few()
+```
+
+```{r}
+#| label: medits-sex-ratio-by-year-abs
+#| fig-cap: "Absolute counts of length records by sex, year, and area; facets allow differing y-scales."
+hake_len |>
+  filter(!is.na(sex)) |>
+  mutate(area = factor(area), sex = factor(sex)) |>
+  group_by(area, year, sex) |>
+  summarise(n_length_records = sum(nblon, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(year, n_length_records, fill = sex)) +
+  geom_col(position = "stack") +
+  facet_grid( area~., scales = "free_y") +
+  labs(
+    x = "Year",
+    y = "Number of length records",
+    fill = "Sex",
+    title = "Counts of length records by sex, year, and area"
+  ) +
+  ggthemes::theme_few()
+```
+
+Weight-at-length is summarized directly from available weights; if raw weights are absent, values fall back to the length–weight relationship to keep the plot populated.
+
+```{r}
+#| label: medits-weight-at-length
+#| fig-cap: "Mean weight-at-length by area; uses raw weights when available, otherwise falls back to the length–weight relationship."
+hake_len |>
+  mutate(
+    area = factor(area),
+    weight_kg = if ("weight" %in% names(hake_len)) {
+      weight
+    } else {
+      6.7e-6 * (length_class / 10) ^ 3.035
+    }
+  ) |>
+  group_by(area, length_class) |>
+  summarise(mean_weight = mean(weight_kg, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(length_class, mean_weight, color = area)) +
+  geom_line() +
+  labs(
+    x = "Length class",
+    y = "Mean weight (kg)",
+    color = "Area",
+    title = "Weight-at-length across all years by area (raw where available, otherwise derived)"
+  ) +
+  ggthemes::theme_few()
+```
+
+## Survey activity by area, month, and year
+
+```{r}
+#| label: medits-survey-activity
+ta |> 
+  mutate(month = factor(month, levels = 1:12),
+         year = factor(year, levels = sort(unique(year), decreasing = FALSE)),
+         area = factor(area)) |>
+  distinct(area, year, month, haul_number) |>
+  ggplot(aes(month, year, fill = area)) +
+  geom_tile(color = "white") +
+  scale_y_discrete(limits = rev) +
+  labs(
+    x = "Month",
+    y = "Year (most recent at bottom)",
+    fill = "Area",
+    title = "MEDITs ESP survey activity by area, month, and year"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+#| label: medits-survey-hauls
+ta |>
+  mutate(month = factor(month, levels = 1:12),
+         area = factor(area)) |>
+  count(area, month, name = "n_hauls") |>
+  ggplot(aes(month, n_hauls, fill = area)) +
+  geom_col(position = "dodge") +
+  labs(
+    x = "Month",
+    y = "Number of hauls (all years)",
+    fill = "Area",
+    title = "Distribution of tows by month and area (all years)"
+  ) +
+  theme_minimal()
+
+ta |>
+  mutate(month = factor(month, levels = 1:12),
+         area = factor(area),
+         year = factor(year)) |>
+  count(year, area, month, name = "n_hauls") |>
+  ggplot(aes(month, n_hauls, fill = area)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~ year ) +
+  labs(
+    x = "Month",
+    y = "Number of hauls",
+    fill = "Area",
+    title = "Tows by month and area, faceted by year"
+  ) +
+  theme_minimal()
+
+# Time series of number of fish measured (length records) by year
+hake_len |>
+  group_by(area, year) |>
+  summarise(total_measured = sum(nblon, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(year, total_measured, color = factor(area), group = area)) +
+  geom_line() +
+  geom_point() +
+  expand_limits(y = 0) +
+  labs(
+    x = "Year",
+    y = "Number of fish measured (Merluccius)",
+    title = "Time series of measured fish by year and area",
+    color = "Area"
+  ) +
+  theme_minimal()
+```
+
+## Consideration of other CPUE indices
+
+To complement the survey indices, we can explore fishery-dependent signals using trawl effort and catch as an approximate nominal CPUE series shared in ITCAM GSA6 presentations. The following illustrative plots normalize effort and catch, then compare catch per horsepower and catch per TRB as simple proxies. These series should be treated cautiously—they are not standardized and reflect indicative trends only.
+
+```{r}
+#| label: growth-sens-cpue
+#| fig-cap: "Nominal CPUE proxies from trawl catch and effort (ITCAM GSA6)."
+dat <- qread("catch_effort.qs")
+
+# Add 4 to columns 2–4 and normalize those columns by their 10th-row values
+cols_adj <- 2:4
+dat_norm <- dat
+dat_norm[, cols_adj] <- dat_norm[, cols_adj] + 4
+norm_vals <- dat_norm[11, cols_adj] |> as.numeric()
+dat_norm[, cols_adj] <- sweep(dat_norm[, cols_adj], 2, norm_vals, "/")
+
+# Time series of normalized catch and effort indicators
+dat_long <- dat_norm |>
+  pivot_longer(-Year, names_to = "series", values_to = "value")
+
+ggplot(dat_long, aes(Year, value, color = series)) +
+  geom_line() +
+  geom_point(size = 2) +
+  labs(
+    x = "Year",
+    y = "Normalized value",
+    title = "Catch and effort indicators over time (normalized)",
+    color = "Series"
+  ) +
+  theme_minimal()
+
+# CPUE proxies: catch per horsepower and per TRB
+dat_ratios <- dat_norm |>
+  mutate(
+    catch_per_HP = Catch / HP,
+    catch_per_TRB = Catch / TRB,
+  ) |>
+  select(Year, catch_per_TRB, catch_per_HP) |>
+  pivot_longer(-Year, names_to = "ratio", values_to = "value")
+
+ggplot(dat_ratios, aes(Year, value, color = ratio)) +
+  geom_line() +
+  geom_point(size = 2) +
+  labs(
+    x = "Year",
+    y = "HKE catch / effort unit",
+    title = "CPUE proxies: catch per horsepower vs catch per TRB",
+    color = "Ratio"
+  ) +
+  theme_minimal()
+```
+
+
+## References
+
+::: {#refs}
+:::
